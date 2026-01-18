@@ -21,7 +21,8 @@ export async function POST(req: Request) {
             prompt = `Create a LinkedIn carousel about "${topic}" with ${slidesCount} slides.
             Tone: ${tone}
             
-            Return ONLY a JSON array of objects, where each object has:
+            Return a JSON object with a "slides" key containing an array of objects.
+            Each object in the array must have:
             - id: a random string
             - title: a short, catchy slide title
             - content: the main content for the slide (max 200 characters). Use \\n for new lines.
@@ -30,9 +31,9 @@ export async function POST(req: Request) {
             Slide 1 should be a hook-driven title slide.
             Final slide should be a Call to Action.
             
-            Format: [{ "id": "1", "title": "...", "content": "...", "layout": "..." }, ...]`;
+            Format: { "slides": [{ "id": "1", "title": "...", "content": "...", "layout": "..." }, ...] }`;
 
-            systemPrompt += " You must return valid JSON only. No prose, no markdown blocks, just the array.";
+            systemPrompt += " You must return valid JSON only. The root element must be an object with a 'slides' property.";
         } else if (type === 'post') {
             prompt = `Write a LinkedIn post about "${topic}".
             Tone: ${tone}
@@ -105,18 +106,41 @@ export async function POST(req: Request) {
             ${context ? `Context: ${context}` : ''}`;
         }
 
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
-            messages: [
-                { role: "system", content: systemPrompt },
-                { role: "user", content: prompt },
-            ],
-            temperature: 0.7,
-            response_format: (type === 'carousel' || type === 'cheatsheet' || type === 'quote' || type === 'banner') ? { type: "json_object" } : undefined,
-        });
+        const model = process.env.NEXT_PUBLIC_OPENAI_MODEL || "gpt-4o-mini";
+        // Check for o1 models OR gpt-5 models (which often have similar restrictions on temp/system roles)
+        const isRestrictedModel = model.startsWith('o1') || model.includes('gpt-5');
+
+        const messages: any[] = [
+            { role: isRestrictedModel ? "user" : "system", content: systemPrompt },
+            { role: "user", content: prompt },
+        ];
+
+        // Prepare request parameters
+        const requestParams: any = {
+            model,
+            messages,
+            response_format: (type === 'carousel' || type === 'cheatsheet' || type === 'quote' || type === 'banner')
+                ? { type: "json_object" }
+                : undefined,
+        };
+
+        // Only add temperature if NOT using restricted model
+        if (!isRestrictedModel) {
+            requestParams.temperature = 0.7;
+        }
+
+        // restricted models (o1/gpt-5) currently might not support response_format or system prompts perfectly
+        if (isRestrictedModel) {
+            delete requestParams.response_format;
+        }
+
+        const response = await openai.chat.completions.create(requestParams);
 
 
         let content = response.choices[0].message.content || "";
+
+        // Clean markdown code blocks if present (common with o1 without json_object)
+        content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '');
 
         if (type === 'carousel' || type === 'cheatsheet' || type === 'quote' || type === 'banner') {
             try {
