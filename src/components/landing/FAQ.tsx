@@ -27,9 +27,9 @@ export const FAQ = () => {
     ];
 
     return (
-        <section className="py-20 md:py-24 bg-white dark:bg-slate-950">
+        <section className="py-12 md:py-24 bg-white dark:bg-slate-950">
             <div className="container px-4 mx-auto max-w-2xl">
-                <div className="text-center mb-12">
+                <div className="text-center mb-10 md:mb-12">
                     <h2 className="text-4xl md:text-6xl font-black mb-4 tracking-tighter uppercase italic text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 animate-gradient-x underline decoration-slate-200 dark:decoration-slate-800 underline-offset-8">FAQ</h2>
                     <p className="text-sm md:text-base text-slate-500 font-medium tracking-tight">Quick answers to common questions.</p>
                 </div>

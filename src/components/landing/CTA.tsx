@@ -4,7 +4,7 @@ import { ArrowRight, Sparkles, Check } from 'lucide-react';
 
 export const CTA = () => {
     return (
-        <section className="py-20 md:py-24">
+        <section className="py-12 md:py-24">
             <div className="container px-4 mx-auto max-w-4xl">
                 <div className="relative rounded-[2rem] overflow-hidden bg-slate-900 px-6 py-10 md:py-12 text-center shadow-2xl isolate max-w-2xl mx-auto">
                     {/* Sexy Animated Gradient Background */}

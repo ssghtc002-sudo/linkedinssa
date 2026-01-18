@@ -27,9 +27,9 @@ const reviews = [
 
 export const Testimonials = () => {
     return (
-        <section className="py-20 md:py-28 bg-slate-50 dark:bg-slate-950 border-y border-slate-100 dark:border-slate-900">
+        <section className="py-12 md:py-28 bg-slate-50 dark:bg-slate-950 border-y border-slate-100 dark:border-slate-900">
             <div className="container px-4 mx-auto">
-                <div className="text-center mb-16 max-w-2xl mx-auto">
+                <div className="text-center mb-10 md:mb-16 max-w-2xl mx-auto">
                     <h2 className="text-4xl md:text-6xl font-black mb-4 tracking-tighter uppercase italic">
                         Loved by <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 animate-gradient-x">Creators.</span>
                     </h2>

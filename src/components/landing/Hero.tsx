@@ -49,8 +49,14 @@ export const Hero = () => {
 
     const handleStart = (e: React.FormEvent) => {
         e.preventDefault();
-        const finalTopic = topic || placeholder;
-        router.push(`/create?topic=${encodeURIComponent(finalTopic)}`);
+
+        if (!topic.trim()) {
+            // If empty, just go to the editor without triggering generation
+            router.push('/create');
+        } else {
+            // If user typed something, go to editor and trigger generation
+            router.push(`/create?topic=${encodeURIComponent(topic)}`);
+        }
     };
 
     return (

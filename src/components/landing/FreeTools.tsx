@@ -54,9 +54,9 @@ const tools = [
 
 export const FreeTools = () => {
     return (
-        <section className="py-20 md:py-28 bg-slate-50 dark:bg-slate-950/50">
+        <section className="py-12 md:py-28 bg-slate-50 dark:bg-slate-950/50">
             <div className="container px-4 mx-auto">
-                <div className="flex items-end justify-between mb-12 max-w-4xl mx-auto px-4 md:px-0">
+                <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-10 md:mb-12 max-w-4xl mx-auto px-0 md:px-0 gap-4 md:gap-0">
                     <div className="space-y-2">
                         <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase italic">
                             Creative <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 animate-gradient-x">Kit.</span>
