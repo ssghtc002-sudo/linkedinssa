@@ -28,7 +28,7 @@ export const Navbar = () => {
 
     return (
         <>
-            <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-background/80 backdrop-blur-md border-b shadow-sm py-3' : 'bg-transparent py-5'}`}>
+            <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-background/80 backdrop-blur-md border-b shadow-sm py-2' : 'bg-transparent py-3 sm:py-5'}`}>
                 <div className="container mx-auto px-4 flex items-center justify-between">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-2.5 group relative z-50">
@@ -38,8 +38,14 @@ export const Navbar = () => {
                         <span className="font-bold text-xl tracking-tight">Carousel<span className="text-primary">Gem</span></span>
                     </Link>
 
-                    {/* Desktop Action */}
-                    <div className="hidden md:flex items-center gap-4">
+                    {/* Desktop Menu */}
+                    <div className="hidden md:flex items-center gap-6">
+                        <Link href="/about" className="text-sm font-bold uppercase italic tracking-wider text-slate-500 hover:text-blue-600 transition-colors">
+                            About
+                        </Link>
+                        <Link href="/contact" className="text-sm font-bold uppercase italic tracking-wider text-slate-500 hover:text-blue-600 transition-colors">
+                            Contact
+                        </Link>
                         <Link
                             href="/tools"
                             className="text-sm font-semibold bg-primary/10 text-primary hover:bg-primary/20 px-5 py-2.5 rounded-full transition-all"
@@ -62,6 +68,20 @@ export const Navbar = () => {
             {isOpen && (
                 <div className="fixed inset-0 z-40 bg-background/95 backdrop-blur-md md:hidden pt-24 px-6 animate-in slide-in-from-top-5 fade-in duration-200">
                     <div className="flex flex-col gap-6 text-lg font-medium">
+                        <Link
+                            href="/about"
+                            className="text-slate-500 p-4 rounded-xl text-center hover:bg-slate-50 transition-colors uppercase font-black tracking-tighter italic"
+                            onClick={() => setIsOpen(false)}
+                        >
+                            About Us
+                        </Link>
+                        <Link
+                            href="/contact"
+                            className="text-slate-500 p-4 rounded-xl text-center hover:bg-slate-50 transition-colors uppercase font-black tracking-tighter italic"
+                            onClick={() => setIsOpen(false)}
+                        >
+                            Contact Us
+                        </Link>
                         <Link
                             href="/tools"
                             className="bg-primary/10 text-primary p-4 rounded-xl text-center hover:bg-primary/20 transition-colors"
