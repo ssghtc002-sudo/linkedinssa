@@ -1,435 +1,250 @@
 'use client';
-import { useState, useRef } from 'react';
-import { Card } from '@/components/ui/card';
-import { DownloadButton } from '../shared/DownloadButton';
-import { Upload, Image as ImageIcon, Type as TypeIcon, Palette } from 'lucide-react';
-import html2canvas from 'html2canvas';
 
-// In a real app, these would be high-res professionally masked images.
-// We are using reliable Unsplash images as backgrounds and CSS transforms for the mockup placement.
-const scenes = [
-    {
-        id: 'city',
-        name: 'Times Square',
-        bg: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1200&q=80',
-        perspective: 'rotateY(-15deg) rotateX(5deg) scale(0.9)',
-        containerStyle: 'top-[15%] left-[20%] w-[60%] shadow-2xl skew-x-1',
-        frame: 'border-[8px] border-zinc-900 bg-zinc-900 rounded-sm',
-        overlay: 'bg-gradient-to-tr from-blue-900/10 to-transparent mix-blend-overlay'
-    },
-    {
-        id: 'subway',
-        name: 'Subway',
-        bg: 'https://images.unsplash.com/photo-1518606326460-64ecfcd81033?auto=format&fit=crop&w=1200&q=80',
-        perspective: 'rotateY(25deg) rotateX(2deg) scale(0.9)',
-        containerStyle: 'top-[22%] left-[10%] w-[50%] shadow-xl',
-        frame: 'border-0 border-neutral-200 bg-white shadow-[0_0_20px_rgba(255,255,255,0.1)]',
-        overlay: 'bg-gradient-to-br from-black/40 to-transparent mix-blend-multiply'
-    },
-    {
-        id: 'minimal',
-        name: 'Art Gallery',
-        bg: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1200&q=80',
-        perspective: 'rotateY(0deg) scale(0.85)',
-        containerStyle: 'top-[15%] left-[20%] w-[60%] shadow-2xl',
-        frame: 'border-[12px] border-white shadow-xl',
-        overlay: 'bg-gradient-to-b from-white/10 to-transparent'
-    },
-    {
-        id: 'neon',
-        name: 'Cyberpunk',
-        bg: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=1200&q=80',
-        perspective: 'rotateX(10deg) scale(0.9)',
-        containerStyle: 'top-[20%] left-[20%] w-[60%] shadow-[0_0_50px_rgba(59,130,246,0.5)]',
-        frame: 'border-4 border-blue-500/50 bg-black box-shadow-[0_0_20px_rgba(0,255,255,0.5)]',
-        overlay: 'bg-gradient-to-t from-purple-500/20 to-blue-500/20 mix-blend-color-dodge'
-    },
-    {
-        id: 'bus_stop',
-        name: 'Bus Stop',
-        bg: 'https://images.unsplash.com/photo-1542345759-35d259c25255?auto=format&fit=crop&w=1200&q=80',
-        perspective: 'rotateY(5deg) scale(0.85)',
-        containerStyle: 'top-[18%] left-[25%] w-[50%] shadow-xl',
-        frame: 'border-[16px] border-zinc-800 bg-zinc-800 rounded-lg',
-        overlay: 'bg-gradient-to-tr from-white/20 to-transparent mix-blend-soft-light'
-    },
-    {
-        id: 'airport',
-        name: 'Airport',
-        bg: 'https://images.unsplash.com/photo-1530519967699-c4391629d665?auto=format&fit=crop&w=1200&q=80',
-        perspective: 'rotateX(-2deg) scale(0.9)',
-        containerStyle: 'top-[15%] left-[15%] w-[70%]',
-        frame: 'border-b-[4px] border-t-[4px] border-zinc-900 bg-black',
-        overlay: 'bg-gradient-to-b from-blue-500/10 to-transparent mix-blend-overlay'
-    },
-    {
-        id: 'sidewalk',
-        name: 'Sidewalk Display',
-        bg: '/images/mockups/billboard-vertical.jpg',
-        perspective: 'rotateY(5deg) scale(0.9)',
-        containerStyle: 'top-[20%] left-[35%] w-[30%] aspect-[9/16] shadow-2xl',
-        frame: 'border-[12px] border-zinc-800 bg-zinc-900',
-        overlay: 'bg-gradient-to-tr from-white/10 to-transparent mix-blend-soft-light'
-    },
-    {
-        id: 'rooftop',
-        name: 'Rooftop',
-        bg: '/images/mockups/billboard-roof.png',
-        perspective: 'rotateX(15deg) rotateY(-2deg) scale(0.9)',
-        containerStyle: 'top-[25%] left-[20%] w-[60%] aspect-[3/1] shadow-xl',
-        frame: 'border-b-[8px] border-t-[2px] border-zinc-800 bg-zinc-900',
-        overlay: 'bg-gradient-to-b from-blue-500/10 to-transparent mix-blend-overlay'
-    }
+import { useState, useRef } from 'react';
+import Image from 'next/image';
+import {
+    Upload, Zap, Download, Eye, Settings,
+    Palette, Type, Sun, Layers, RefreshCw,
+} from 'lucide-react';
+import html2canvas from 'html2canvas';
+import { FOUNDER } from '@/lib/founder-profile';
+
+const SCENES = [
+    { id: 'city',    name: 'Times Square',  bg: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1200&q=80',  perspective: 'rotateY(-12deg) rotateX(3deg) scale(0.88)', pos: 'top-[14%] left-[20%] w-[56%]', frame: 'border-[10px] border-zinc-900', overlay: 'bg-blue-900/10 mix-blend-overlay' },
+    { id: 'subway',  name: 'Metro Station', bg: 'https://images.unsplash.com/photo-1518606326460-64ecfcd81033?auto=format&fit=crop&w=1200&q=80',  perspective: 'rotateY(20deg) rotateX(2deg) scale(0.88)', pos: 'top-[20%] left-[10%] w-[48%]', frame: 'border-0 bg-white shadow-xl', overlay: 'bg-black/30 mix-blend-multiply' },
+    { id: 'gallery', name: 'Art Gallery',   bg: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1200&q=80',  perspective: 'scale(0.82)',                               pos: 'top-[14%] left-[20%] w-[60%]', frame: 'border-[14px] border-white shadow-2xl', overlay: 'bg-white/5' },
+    { id: 'tokyo',   name: 'Cyber Tokyo',   bg: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=1200&q=80',    perspective: 'rotateX(8deg) scale(0.88)',                  pos: 'top-[18%] left-[18%] w-[64%]', frame: 'border-4 border-blue-500/60', overlay: 'bg-purple-900/20 mix-blend-color-dodge' },
+    { id: 'office',  name: 'Office Lobby',  bg: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80',  perspective: 'scale(0.9) rotateY(5deg)',                   pos: 'top-[10%] left-[30%] w-[40%]', frame: 'border-[8px] border-slate-100 shadow-2xl', overlay: '' },
+    { id: 'street',  name: 'Street Corner', bg: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1200&q=80',  perspective: 'rotateY(-5deg) scale(0.85)',                 pos: 'top-[22%] left-[24%] w-[52%]', frame: 'border-[6px] border-zinc-800 rounded-sm', overlay: 'bg-amber-900/10 mix-blend-multiply' },
+];
+
+const GRADIENTS = [
+    { id: 'blue',    g: 'linear-gradient(135deg,#1d4ed8,#0077b5)', label: 'LinkedIn Blue' },
+    { id: 'dark',    g: 'linear-gradient(135deg,#0f172a,#1e293b)', label: 'Midnight' },
+    { id: 'sunset',  g: 'linear-gradient(135deg,#f97316,#ec4899)',  label: 'Sunset' },
+    { id: 'emerald', g: 'linear-gradient(135deg,#059669,#0d9488)', label: 'Emerald' },
+    { id: 'royal',   g: 'linear-gradient(135deg,#7c3aed,#be185d)', label: 'Royal' },
+    { id: 'white',   g: '#ffffff',                                  label: 'White' },
 ];
 
 export const BillboardMockupGenerator = () => {
-    const [contentType, setContentType] = useState<'image' | 'text'>('image');
-    const [uploadedImage, setUploadedImage] = useState<string>('');
-    const [textContent, setTextContent] = useState({
-        text: 'YOUR AD HERE',
-        color: '#000000',
-        bgColor: '#ffffff',
-        fontSize: 100,
-        fontFamily: 'font-sans'
-    });
-
-    const [selectedScene, setSelectedScene] = useState(scenes[0]);
-    const [controls, setControls] = useState({
-        brightness: 100,
-        contrast: 100,
-        saturation: 100,
-        opacity: 95,
-        blur: 0
-    });
-    const [showTexture, setShowTexture] = useState(true);
-    const [activeTab, setActiveTab] = useState<'scenes' | 'content' | 'adjust'>('scenes');
+    const [scene, setScene]         = useState(SCENES[0]);
+    const [mode, setMode]           = useState<'image' | 'text'>('text');
+    const [uploadedImg, setUploaded] = useState('');
+    const [headline, setHeadline]   = useState('LEGENDARY LINKEDIN CONTENT');
+    const [subline, setSubline]     = useState('carouselgem.com');
+    const [textColor, setTextColor] = useState('#ffffff');
+    const [selectedGrad, setGrad]   = useState(GRADIENTS[0]);
+    const [customBg, setCustomBg]   = useState('');
+    const [brightness, setBrightness] = useState(100);
+    const [contrast, setContrast]   = useState(100);
+    const [scanlines, setScanlines] = useState(true);
+    const [showBrand, setShowBrand] = useState(true);
     const previewRef = useRef<HTMLDivElement>(null);
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                setUploadedImage(event.target?.result as string);
-                setContentType('image');
-            };
-            reader.readAsDataURL(file);
-        }
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => { setUploaded(ev.target?.result as string); setMode('image'); };
+        reader.readAsDataURL(file);
     };
 
-    const downloadMockup = async () => {
+    const download = async () => {
         if (!previewRef.current) return;
         try {
-            const canvas = await html2canvas(previewRef.current, {
-                scale: 2,
-                backgroundColor: null,
-                useCORS: true,
-                allowTaint: true,
-            });
-            const link = document.createElement('a');
-            link.download = `billboard-mockup-${selectedScene.id}.png`;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-        } catch (err) {
-            console.error('Download error:', err);
-        }
+            const canvas = await html2canvas(previewRef.current, { scale: 2, backgroundColor: null, useCORS: true, allowTaint: true });
+            const a = document.createElement('a');
+            a.download = `billboard-${scene.id}-${Date.now()}.png`;
+            a.href = canvas.toDataURL('image/png');
+            a.click();
+        } catch (err) { console.error(err); }
     };
 
+    const billboardBg = mode === 'image' && uploadedImg ? 'none' : (customBg || selectedGrad.g);
+
     return (
-        <div className="grid lg:grid-cols-12 gap-8 items-start">
-            {/* Controls Section - 4 Columns */}
-            <Card className="lg:col-span-4 p-6 space-y-6 lg:sticky lg:top-8 max-h-[calc(100vh-100px)] overflow-y-auto">
-                <div className="space-y-4">
-                    <div className="flex bg-muted p-1 rounded-lg">
-                        <button
-                            onClick={() => setActiveTab('scenes')}
-                            className={`flex-1 text-xs font-medium py-2 rounded-md transition-all ${activeTab === 'scenes' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                        >
-                            Scenes
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('content')}
-                            className={`flex-1 text-xs font-medium py-2 rounded-md transition-all ${activeTab === 'content' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                        >
-                            Content
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('adjust')}
-                            className={`flex-1 text-xs font-medium py-2 rounded-md transition-all ${activeTab === 'adjust' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                        >
-                            Adjust
-                        </button>
+        <div className="grid lg:grid-cols-12 gap-6 items-start">
+
+            {/* LEFT */}
+            <div className="lg:col-span-5 space-y-4">
+                <div className="rounded-3xl bg-white/90 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 shadow-xl overflow-hidden">
+
+                    {/* Header */}
+                    <div className="px-5 pt-5 pb-3 border-b border-slate-100 dark:border-white/5 flex items-center gap-2">
+                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center shadow-md shadow-blue-500/20">
+                            <Layers className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
+                            <p className="text-sm font-black tracking-tight text-slate-800 dark:text-white">Billboard Mockup</p>
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">6 Scenes • LinkedIn Visual</p>
+                        </div>
                     </div>
 
-                    {activeTab === 'scenes' && (
-                        <div className="grid grid-cols-2 gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            {scenes.map((scene) => (
-                                <button
-                                    key={scene.id}
-                                    onClick={() => setSelectedScene(scene)}
-                                    className={`relative h-24 rounded-xl overflow-hidden border-2 transition-all group ${selectedScene.id === scene.id
-                                        ? 'border-primary shadow-md ring-2 ring-primary/20'
-                                        : 'border-slate-200 dark:border-slate-800 hover:border-primary/50'
-                                        }`}
-                                >
-                                    <img
-                                        src={scene.bg}
-                                        alt={scene.name}
-                                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                    />
-                                    <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end justify-center p-2 ${selectedScene.id === scene.id ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'}`}>
-                                        <span className="text-white font-medium text-xs text-center drop-shadow-md">{scene.name}</span>
+                    {/* Scenes */}
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5 space-y-2">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1"><Eye className="w-3 h-3" /> Scene</p>
+                        <div className="grid grid-cols-3 gap-2">
+                            {SCENES.map(s => (
+                                <button key={s.id} onClick={() => setScene(s)}
+                                    className={`relative h-16 rounded-xl overflow-hidden border-2 transition-all group ${scene.id === s.id ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-transparent hover:border-blue-300'}`}>
+                                    <img src={s.bg} alt={s.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end justify-center pb-1.5">
+                                        <span className="text-white font-black text-[7px] uppercase tracking-widest drop-shadow">{s.name}</span>
                                     </div>
                                 </button>
                             ))}
                         </div>
-                    )}
+                    </div>
 
-                    {activeTab === 'content' && (
-                        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            <div className="flex bg-muted p-1 rounded-lg">
-                                <button
-                                    onClick={() => setContentType('image')}
-                                    className={`flex-1 text-sm font-medium py-2 rounded-md transition-all flex items-center justify-center gap-2 ${contentType === 'image' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'}`}
-                                >
-                                    <ImageIcon className="w-4 h-4" /> Upload
-                                </button>
-                                <button
-                                    onClick={() => setContentType('text')}
-                                    className={`flex-1 text-sm font-medium py-2 rounded-md transition-all flex items-center justify-center gap-2 ${contentType === 'text' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'}`}
-                                >
-                                    <TypeIcon className="w-4 h-4" /> Text Ad
-                                </button>
-                            </div>
-
-                            {contentType === 'image' ? (
-                                <div className="space-y-4">
-                                    <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary transition-colors bg-slate-50 dark:bg-slate-900 group relative overflow-hidden">
-                                        <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                                        {uploadedImage ? (
-                                            <img src={uploadedImage} alt="Preview" className="absolute inset-0 w-full h-full object-contain p-2" />
-                                        ) : (
-                                            <div className="text-center text-muted-foreground relative z-10">
-                                                <Upload className="w-8 h-8 mx-auto mb-2 opacity-50 block" />
-                                                <span className="text-xs font-medium">Click to upload image</span>
-                                            </div>
-                                        )}
-                                    </label>
-                                    <p className="text-xs text-muted-foreground text-center">Your image will automatically update across all scenes.</p>
-                                </div>
-                            ) : (
-                                <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-medium">Message</label>
-                                        <textarea
-                                            value={textContent.text}
-                                            onChange={(e) => setTextContent({ ...textContent, text: e.target.value })}
-                                            className="w-full h-24 p-3 rounded-md border bg-background text-sm resize-none focus:ring-2 focus:ring-primary/20 outline-none"
-                                            placeholder="Enter your ad text..."
-                                        />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-medium flex items-center gap-2"><Palette className="w-3 h-3" /> Text Color</label>
-                                            <div className="flex gap-2 items-center">
-                                                <input
-                                                    type="color"
-                                                    value={textContent.color}
-                                                    onChange={(e) => setTextContent({ ...textContent, color: e.target.value })}
-                                                    className="w-8 h-8 rounded cursor-pointer border-0 p-0"
-                                                />
-                                                <span className="text-xs text-muted-foreground uppercase">{textContent.color}</span>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-medium flex items-center gap-2"><Palette className="w-3 h-3" /> Background</label>
-                                            <div className="flex gap-2 items-center">
-                                                <input
-                                                    type="color"
-                                                    value={textContent.bgColor}
-                                                    onChange={(e) => setTextContent({ ...textContent, bgColor: e.target.value })}
-                                                    className="w-8 h-8 rounded cursor-pointer border-0 p-0"
-                                                />
-                                                <span className="text-xs text-muted-foreground uppercase">{textContent.bgColor}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between">
-                                            <label className="text-xs font-medium">Font Size</label>
-                                            <span className="text-xs text-muted-foreground">{textContent.fontSize}px</span>
-                                        </div>
-                                        <input
-                                            type="range"
-                                            min="20"
-                                            max="400"
-                                            value={textContent.fontSize}
-                                            onChange={(e) => setTextContent({ ...textContent, fontSize: Number(e.target.value) })}
-                                            className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
-                                        />
-                                    </div>
-                                </div>
-                            )}
+                    {/* Content mode */}
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5 space-y-3">
+                        <div className="flex gap-2">
+                            <button onClick={() => setMode('text')} className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${mode === 'text' ? 'bg-blue-600 text-white border-blue-600' : 'border-slate-200 dark:border-slate-700 text-slate-500'}`}>
+                                <Type className="w-3.5 h-3.5 inline mr-1" /> Text
+                            </button>
+                            <label className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border cursor-pointer text-center ${mode === 'image' ? 'bg-blue-600 text-white border-blue-600' : 'border-slate-200 dark:border-slate-700 text-slate-500'}`}>
+                                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                                <Upload className="w-3.5 h-3.5 inline mr-1" />{uploadedImg ? '✓ Image' : 'Upload'}
+                            </label>
                         </div>
-                    )}
 
-                    {activeTab === 'adjust' && (
-                        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <label className="text-sm font-medium">Screen Texture</label>
-                                    <button
-                                        onClick={() => setShowTexture(!showTexture)}
-                                        className={`w-10 h-6 rounded-full transition-colors flex items-center px-1 ${showTexture ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'}`}
-                                    >
-                                        <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${showTexture ? 'translate-x-4' : 'translate-x-0'}`} />
-                                    </button>
-                                </div>
-                                <p className="text-xs text-muted-foreground">Adds a realistic LED pixel grid overlay to the screen.</p>
+                        {mode === 'text' && (
+                            <div className="space-y-2">
+                                <textarea rows={2} value={headline} onChange={e => setHeadline(e.target.value)}
+                                    className="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-black outline-none focus:ring-2 focus:ring-blue-500/30 resize-none uppercase tracking-wide" />
+                                <input type="text" value={subline} onChange={e => setSubline(e.target.value)}
+                                    placeholder="Sub-line or URL"
+                                    className="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium outline-none focus:ring-2 focus:ring-blue-500/30" />
                             </div>
+                        )}
+                    </div>
 
-                            <div className="space-y-4 pt-2 border-t">
-                                {[
-                                    { label: 'Brightness', key: 'brightness', min: 50, max: 150 },
-                                    { label: 'Contrast', key: 'contrast', min: 50, max: 150 },
-                                    { label: 'Saturation', key: 'saturation', min: 0, max: 200 },
-                                    { label: 'Opacity', key: 'opacity', min: 50, max: 100 },
-                                    { label: 'Blur', key: 'blur', min: 0, max: 2, step: 0.1 },
-                                ].map((control) => (
-                                    <div key={control.key} className="space-y-1">
-                                        <div className="flex justify-between text-xs">
-                                            <span>{control.label}</span>
-                                            <span className="text-muted-foreground">{controls[control.key as keyof typeof controls]}%</span>
-                                        </div>
-                                        <input
-                                            type="range"
-                                            min={control.min}
-                                            max={control.max}
-                                            step={control.step || 1}
-                                            value={controls[control.key as keyof typeof controls]}
-                                            onChange={(e) => setControls(c => ({
-                                                ...c,
-                                                [control.key]: Number(e.target.value)
-                                            }))}
-                                            className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
-                                        />
-                                    </div>
+                    {/* Design */}
+                    {mode === 'text' && (
+                        <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5 space-y-3">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1"><Palette className="w-3 h-3" /> Background</p>
+                            <div className="grid grid-cols-3 gap-1.5">
+                                {GRADIENTS.map(g => (
+                                    <button key={g.id} onClick={() => { setGrad(g); setCustomBg(''); }}
+                                        className={`rounded-xl overflow-hidden border-2 transition-all hover:scale-105 ${selectedGrad.id === g.id && !customBg ? 'border-blue-500 scale-105' : 'border-transparent'}`}>
+                                        <div className="h-8" style={{ background: g.g }} />
+                                        <p className="text-[7px] font-black uppercase tracking-widest text-slate-500 text-center py-0.5">{g.label}</p>
+                                    </button>
                                 ))}
                             </div>
-                        </div>
-                    )}
-                </div>
-
-                <div className="pt-2">
-                    <DownloadButton
-                        onClick={downloadMockup}
-                        label="Download Mockup"
-                        disabled={contentType === 'image' && !uploadedImage}
-                        className="w-full h-12 text-lg font-semibold shadow-lg"
-                    />
-                </div>
-            </Card>
-
-            {/* Preview Section - 8 Columns */}
-            <Card className="lg:col-span-8 p-0 overflow-hidden bg-zinc-950 flex items-center justify-center min-h-[500px] border-0 shadow-2xl relative group rounded-xl ring-1 ring-white/10">
-                <div
-                    ref={previewRef}
-                    className="w-full max-w-[1200px] aspect-[16/10] relative overflow-hidden bg-black"
-                >
-                    {/* Scene Background */}
-                    <img
-                        src={selectedScene.bg}
-                        alt="Background"
-                        crossOrigin="anonymous"
-                        className="absolute inset-0 w-full h-full object-cover"
-                    />
-
-                    {/* Container for the 3D Transformed Screen */}
-                    <div
-                        className="absolute inset-0 preserve-3d"
-                        style={{
-                            perspective: '2000px' // Global perspective container
-                        }}
-                    >
-                        <div
-                            className={`absolute flex items-center justify-center transition-all duration-700 ease-in-out ${selectedScene.containerStyle}`}
-                            /* Individual scene perspective transform is applied here */
-                            style={{
-                                transform: selectedScene.perspective,
-                                transformOrigin: 'center center',
-                            }}
-                        >
-                            {/* The Screen Itself */}
-                            <div
-                                className={`w-full h-full relative overflow-hidden flex items-center justify-center ${selectedScene.frame}`}
-                                style={{ backgroundColor: contentType === 'text' ? textContent.bgColor : '#000000' }}
-                            >
-                                {/* User Content (Image OR Text) */}
-                                <div
-                                    className="w-full h-full relative flex items-center justify-center overflow-hidden"
-                                    style={{
-                                        filter: `brightness(${controls.brightness}%) contrast(${controls.contrast}%) saturate(${controls.saturation}%) blur(${controls.blur}px)`,
-                                        opacity: controls.opacity / 100,
-                                    }}
-                                >
-                                    {contentType === 'image' ? (
-                                        uploadedImage ? (
-                                            <img
-                                                src={uploadedImage}
-                                                alt="Billboard Content"
-                                                className="w-full h-full object-cover"
-                                            />
-                                        ) : (
-                                            <div className="flex flex-col items-center justify-center text-white/50">
-                                                <ImageIcon className="w-12 h-12 mb-2 opacity-50" />
-                                                <p className="text-xs font-bold tracking-[0.2em] uppercase opacity-50">No Image Selected</p>
-                                            </div>
-                                        )
-                                    ) : (
-                                        <div
-                                            className="p-4 text-center break-words w-full h-full flex items-center justify-center"
-                                            style={{
-                                                color: textContent.color,
-                                                fontSize: `${textContent.fontSize}px`,
-                                                lineHeight: 1.1,
-                                                fontWeight: 'bold',
-                                                fontFamily: 'system-ui, sans-serif'
-                                            }}
-                                        >
-                                            {textContent.text}
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* "Screen Texture" (Scanlines/Pixels) */}
-                                {showTexture && (
-                                    <div
-                                        className="absolute inset-0 pointer-events-none opacity-40 mix-blend-overlay z-10"
-                                        style={{
-                                            backgroundImage: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))',
-                                            backgroundSize: '100% 2px, 3px 100%',
-                                        }}
-                                    />
-                                )}
-
-                                {/* Glass Reflection / Glare */}
-                                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-60 pointer-events-none z-20" />
-
-                                {/* Inner Shadow for Depth */}
-                                <div className="absolute inset-0 shadow-[inset_0_0_40px_rgba(0,0,0,0.8)] pointer-events-none z-30" />
+                            <div className="flex items-center gap-3">
+                                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Text</p>
+                                <input type="color" value={textColor} onChange={e => setTextColor(e.target.value)}
+                                    className="w-8 h-8 rounded-lg border border-slate-200 cursor-pointer p-0.5" />
                             </div>
                         </div>
+                    )}
+
+                    {/* Adjustments */}
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5 space-y-3">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1"><Settings className="w-3 h-3" /> Adjustments</p>
+                        {[{ label: 'Brightness', val: brightness, set: setBrightness }, { label: 'Contrast', val: contrast, set: setContrast }].map(({ label, val, set }) => (
+                            <div key={label} className="space-y-1">
+                                <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-slate-400">
+                                    <span>{label}</span><span>{val}%</span>
+                                </div>
+                                <input type="range" min={50} max={150} value={val} onChange={e => set(+e.target.value)} className="w-full accent-blue-600" />
+                            </div>
+                        ))}
+                        <div className="flex items-center justify-between">
+                            <p className="text-[10px] font-bold text-slate-500">LED Scanlines</p>
+                            <button onClick={() => setScanlines(v => !v)} className={`w-8 h-4 rounded-full relative transition-colors ${scanlines ? 'bg-blue-600' : 'bg-slate-300'}`}>
+                                <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform ${scanlines ? 'translate-x-4' : 'translate-x-0.5'}`} />
+                            </button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <p className="text-[10px] font-bold text-slate-500">Founder Branding</p>
+                            <button onClick={() => setShowBrand(v => !v)} className={`w-8 h-4 rounded-full relative transition-colors ${showBrand ? 'bg-blue-600' : 'bg-slate-300'}`}>
+                                <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform ${showBrand ? 'translate-x-4' : 'translate-x-0.5'}`} />
+                            </button>
+                        </div>
                     </div>
 
-                    {/* Environmental Lighting Overlay (Global) */}
-                    <div className={`absolute inset-0 pointer-events-none ${selectedScene.overlay} mix-blend-overlay`} />
-
-                    {/* Branding Watermark */}
-                    <div className="absolute bottom-6 right-6 text-white/40 text-[10px] uppercase tracking-widest font-bold z-50 drop-shadow-md">
-                        CarouselAI • Billboard Mockup
+                    <div className="px-4 py-4">
+                        <button onClick={download}
+                            className="w-full h-11 rounded-2xl text-sm font-black bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/20 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+                            <Download className="w-4 h-4" /> Export Mockup PNG
+                        </button>
                     </div>
                 </div>
-            </Card>
+            </div>
+
+            {/* RIGHT: Render */}
+            <div className="lg:col-span-7">
+                <div className="rounded-3xl bg-[#0c0e10] border border-slate-800 shadow-2xl overflow-hidden">
+                    <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-1.5"><Eye className="w-3.5 h-3.5" /> Studio Viewport</p>
+                        <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-blue-400 bg-blue-500/10 px-2 py-1 rounded-lg border border-blue-500/20">
+                            <Zap className="w-3 h-3 fill-blue-500" /> Live Render
+                        </div>
+                    </div>
+                    <div className="p-4">
+                        <div ref={previewRef}
+                            className="w-full aspect-[16/10] relative overflow-hidden rounded-xl bg-black ring-1 ring-white/5 group">
+                            {/* Scene background */}
+                            <img src={scene.bg} alt="" className="absolute inset-0 w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105" style={{ filter: `brightness(${brightness}%) contrast(${contrast}%)` }} />
+
+                            {/* Billboard panel in perspective */}
+                            <div className="absolute inset-0" style={{ perspective: '2000px' }}>
+                                <div className={`absolute flex items-center justify-center ${scene.pos} ${scene.frame}`}
+                                    style={{ transform: scene.perspective, transformOrigin: 'center center' }}>
+                                    <div className="w-full h-full relative overflow-hidden flex items-center justify-center"
+                                        style={mode === 'image' && uploadedImg ? {} : { background: billboardBg }}>
+                                        <div className="w-full h-full flex items-center justify-center">
+                                            {mode === 'image' && uploadedImg
+                                                ? <img src={uploadedImg} alt="Ad" className="w-full h-full object-cover" />
+                                                : (
+                                                    <div className="p-6 text-center w-full">
+                                                        <p className="font-black leading-tight tracking-tighter uppercase break-words"
+                                                            style={{ color: textColor, fontSize: 'clamp(10px, 3.5vw, 32px)' }}>
+                                                            {headline}
+                                                        </p>
+                                                        {subline && (
+                                                            <p className="mt-2 opacity-70 font-semibold"
+                                                                style={{ color: textColor, fontSize: 'clamp(7px, 1.4vw, 14px)' }}>
+                                                                {subline}
+                                                            </p>
+                                                        )}
+                                                        {showBrand && (
+                                                            <div className="flex items-center justify-center gap-1.5 mt-3">
+                                                                <div className="relative w-5 h-5 rounded-full overflow-hidden">
+                                                                    <Image src={FOUNDER.avatar} alt={FOUNDER.name} fill className="object-cover" />
+                                                                </div>
+                                                                <span className="font-black opacity-60" style={{ color: textColor, fontSize: 'clamp(6px, 1vw, 10px)' }}>{FOUNDER.name}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )
+                                            }
+                                        </div>
+                                        {/* scanlines */}
+                                        {scanlines && (
+                                            <div className="absolute inset-0 pointer-events-none opacity-30 mix-blend-overlay z-10"
+                                                style={{ backgroundImage: 'linear-gradient(rgba(18,16,16,0) 50%,rgba(0,0,0,0.25) 50%),linear-gradient(90deg,rgba(255,0,0,0.04),rgba(0,255,0,0.02),rgba(0,0,255,0.04))', backgroundSize: '100% 2px,3px 100%' }} />
+                                        )}
+                                        {/* glare */}
+                                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.07] to-transparent pointer-events-none z-20 group-hover:translate-x-full transition-transform duration-[3s]" />
+                                        <div className="absolute inset-0 shadow-[inset_0_0_60px_rgba(0,0,0,0.8)] pointer-events-none z-30" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* scene overlay */}
+                            {scene.overlay && <div className={`absolute inset-0 pointer-events-none ${scene.overlay}`} />}
+
+                            {/* watermark */}
+                            <div className="absolute bottom-3 right-4 text-white/30 font-black text-[7px] uppercase tracking-[0.3em]">CarouselGem Studio</div>
+                        </div>
+                        <p className="text-[9px] text-slate-500 mt-2 text-center">↑ Hover to see ambient effects • Export captures exactly what you see</p>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };

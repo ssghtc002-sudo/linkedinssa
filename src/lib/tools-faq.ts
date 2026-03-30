@@ -4,10 +4,37 @@ export interface FAQItem {
 }
 
 export const TOOL_FAQS: Record<string, FAQItem[]> = {
+    'linkedin-hashtag-generator': [
+        {
+            question: "How many hashtags should I use on a LinkedIn post?",
+            answer: "LinkedIn's own data recommends using no more than 3–5 hashtags per post. Using too many (10+) can actually reduce your reach as LinkedIn's algorithm may flag the post as spam. Focus on 1–2 broad hashtags plus 2–3 niche-specific tags for the best organic reach."
+        },
+        {
+            question: "What are the best hashtags for LinkedIn in 2025?",
+            answer: "The best performing hashtags on LinkedIn in 2025 include broad ones like #leadership, #entrepreneurship, #marketing, and #innovation (1M+ followers), paired with niche tags like #b2bmarketing, #saas, #personalbrandng, and #careeradvice. Our generator helps you find the optimal mix for your specific industry and content."
+        },
+        {
+            question: "Do hashtags on LinkedIn actually increase reach?",
+            answer: "Yes. LinkedIn uses hashtags to categorize and distribute content to users who follow or are interested in those topics. Strategic hashtag use can increase your post's organic reach by 30–50% by surfacing it in hashtag feeds and to non-connected users who follow those topics."
+        },
+        {
+            question: "What is the difference between broad and niche hashtags?",
+            answer: "Broad hashtags like #leadership or #marketing have millions of followers and give you massive potential reach but high competition. Niche hashtags like #b2bleadership or #contentmarketingstrategy have smaller but highly targeted audiences who are more likely to engage. The most effective strategy combines both types."
+        },
+        {
+            question: "Should I put hashtags at the end or inside the post?",
+            answer: "Best practice for LinkedIn is to add hashtags at the end of your post, separated from the main content by a line break. Embedding hashtags mid-sentence can disrupt readability and reduce the professional feel of your post. Focus on great content first — hashtags are a distribution tool, not the main event."
+        },
+        {
+            question: "Can I save and reuse hashtag sets?",
+            answer: "Yes! Our tool lets you build a personal hashtag bank by loading industry presets, adding trending tags, and generating AI-powered suggestions. Select your favorite combination and copy them in one click. You can build different tag sets for different content pillars and return to them anytime."
+        }
+    ],
+
     'linkedin-post-generator': [
         {
-            question: "How does the LinkedIn Post Generator work?",
-            answer: "Our AI-powered LinkedIn Post Generator analyzes your topic and creates engaging, professional posts in seconds. Simply enter your topic, and the tool generates multiple post variations optimized for LinkedIn engagement."
+            question: "How does the Free AI LinkedIn Post Generator work?",
+            answer: "Our Free AI-powered LinkedIn Post Generator analyzes your topic and creates viral, engaging, and professional posts in seconds. Simply enter your topic, select your tone, and our AI LinkedIn Content Creator generates the perfect post optimized for the LinkedIn algorithm."
         },
         {
             question: "Is the LinkedIn Post Generator free?",
@@ -42,41 +69,54 @@ export const TOOL_FAQS: Record<string, FAQItem[]> = {
         }
     ],
 
+    'linkedin-text-staircase-generator': [
+        {
+            question: "What is a LinkedIn text staircase?",
+            answer: "A LinkedIn text staircase is a visual formatting technique where each line of a post is progressively indented, creating a stepped or ladder-like appearance in the feed. It dramatically increases the visual impact of your hook and encourages readers to read every single line."
+        },
+        {
+            question: "Why do staircase posts get more engagement on LinkedIn?",
+            answer: "Staircase formatting creates a strong visual pattern that stops the scroll. The eye naturally follows the steps downward, which means readers consume more of your post before LinkedIn's 'see more' cut-off—leading to higher dwell time, more engagement signals, and wider organic reach."
+        },
+        {
+            question: "What are Braille Blank spaces and why should I use them?",
+            answer: "Braille Blank (U+2800) is a special Unicode character that appears as an invisible space. Unlike regular spaces, LinkedIn does not strip these characters when your post is published, making them the most reliable way to create persistent visual indentation in your posts."
+        },
+        {
+            question: "Can I use this tool on mobile?",
+            answer: "Yes! The Staircase Generator is fully responsive and works on all mobile devices. You can type, configure, preview, and copy your formatted staircase post from anywhere."
+        },
+        {
+            question: "How many lines work best for a staircase post?",
+            answer: "4-7 lines is the sweet spot. Too few and the staircase effect isn't visible. Too many and the post starts to look cluttered. Use the live preview to judge the visual balance before copying."
+        },
+        {
+            question: "Does the staircase format work in LinkedIn comments?",
+            answer: "Yes! You can paste staircase-formatted text into LinkedIn comments as well. Comments with visual formatting stand out in the comment section and can drive additional engagement."
+        }
+    ],
+
     'linkedin-post-text-formatter': [
+
         {
-            question: "How do I make text bold on LinkedIn?",
-            answer: "Use our LinkedIn Text Formatter to convert your text to bold Unicode characters. Simply type your text, copy the bold version, and paste it into your LinkedIn post."
+            question: "How do I bold text in a LinkedIn post?",
+            answer: "Since LinkedIn doesn't natively support bolding, you must use a Unicode generator. Our tool converts standard characters into mathematical Unicode symbols that appear bold across all devices and browsers."
         },
         {
-            question: "Can I use italic text on LinkedIn?",
-            answer: "Yes! Our tool generates italic Unicode text that works perfectly on LinkedIn. The formatting displays correctly across all devices and platforms."
+            question: "Is it safe to use bold or italic fonts on LinkedIn?",
+            answer: "Yes, it is perfectly safe. These are standard Unicode characters. However, we recommend using them selectively (for hooks or emphasis) to ensure your content remains professional and highly readable."
         },
         {
-            question: "Will formatted text work in LinkedIn comments?",
-            answer: "Yes! The Unicode formatted text works in posts, comments, profile sections, and messages on LinkedIn."
+            question: "Will these fonts work on the LinkedIn mobile app?",
+            answer: "Absolutely. Our formatter uses 'Retina-Ready' Unicode symbols that are universally compatible with iOS, Android, and all modern web browsers."
+        },
+        {
+            question: "Does bold text help with LinkedIn SEO?",
+            answer: "Visual hierarchy helps with 'Dwell Time' (how long people stop to read). By bolding your primary keywords or hooks, you increase the chances of users engaging with your post, which signals the algorithm to boost your reach."
         },
         {
             question: "Is the text formatter free to use?",
             answer: "Absolutely! Our LinkedIn Text Formatter is 100% free with unlimited usage and no registration required."
-        }
-    ],
-
-    'linkedin-text-staircase-generator': [
-        {
-            question: "What is staircase text formatting?",
-            answer: "Staircase text is a visual formatting style where each line is progressively indented, creating a step-like appearance. It's eye-catching and great for LinkedIn hooks and lists."
-        },
-        {
-            question: "Why use staircase formatting on LinkedIn?",
-            answer: "Staircase formatting makes your posts stand out in the feed, improves readability, and draws attention to key points. It's particularly effective for lists and sequential information."
-        },
-        {
-            question: "Can I customize the staircase pattern?",
-            answer: "Yes! You can adjust the indentation level and choose different staircase styles to match your content and personal brand."
-        },
-        {
-            question: "Does staircase text work on mobile LinkedIn?",
-            answer: "Yes! The staircase formatting uses Unicode spaces that display correctly on all devices including mobile apps."
         }
     ],
 
@@ -286,25 +326,6 @@ export const TOOL_FAQS: Record<string, FAQItem[]> = {
         {
             question: "What readability formula do you use?",
             answer: "We use the Flesch Reading Ease score, which is widely recognized and used by professional writers and marketers."
-        }
-    ],
-
-    'linkedin-hashtag-generator': [
-        {
-            question: "How many hashtags should I use on LinkedIn?",
-            answer: "LinkedIn experts generally recommend using 3 to 5 relevant hashtags per post. Using too many can make your post look like spam, while using none might limit your reach."
-        },
-        {
-            question: "How does the hashtag generator work?",
-            answer: "Our AI analyzes your post content or topic to identify keywords and then suggests a mix of high-reach, niche, and trending hashtags that match your content's context."
-        },
-        {
-            question: "Are these hashtags optimized for LinkedIn?",
-            answer: "Yes! Our generator prioritizes hashtags that are commonly used and followed on LinkedIn, helping your content appear in the feeds of people interested in those specific topics."
-        },
-        {
-            question: "Can I use these hashtags on other platforms?",
-            answer: "While specifically optimized for LinkedIn, these hashtags are generally relevant across other professional platforms like Twitter (X) and Instagram, though the optimal number of hashtags may vary."
         }
     ],
 

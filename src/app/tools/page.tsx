@@ -2,148 +2,202 @@ import Link from 'next/link';
 import { TOOLS } from '@/lib/tools-data';
 import { Navbar } from '@/components/landing/Navbar';
 import { Footer } from '@/components/landing/Footer';
-import { ArrowRight, ChevronRight, Sparkles, Zap, Smartphone, PenTool, Layout, Image as ImageIcon, QrCode } from 'lucide-react';
+import { FAQ } from '@/components/tools/FAQ';
+import { ArrowRight, Sparkles, Zap, ChevronRight } from 'lucide-react';
+import type { Metadata } from 'next';
 
-export const metadata = {
-    title: 'Free LinkedIn Tools | CarouselGem',
-    description: 'A collection of 15+ free AI tools to help you grow on LinkedIn. Post generators, formatters, previews, and more.',
+export const metadata: Metadata = {
+    title: '15+ Free AI LinkedIn Tools 2026 | CarouselGem',
+    description: 'Skyrocket your personal brand with 15+ Free AI LinkedIn Tools in 2026. Create viral posts, format text, generate QR codes, preview posts, and more. Free forever.',
+    keywords: ['free ai linkedin tools 2026', 'linkedin post generator', 'linkedin text formatter', 'linkedin carousel maker', 'free linkedin tools', 'linkedin hashtag generator'],
+    openGraph: {
+        title: '15+ Free AI LinkedIn Tools 2026 | CarouselGem',
+        description: 'Skyrocket your personal brand with 15+ Free AI LinkedIn Tools.',
+        type: 'website',
+        url: 'https://carouselgem.com/tools',
+    },
+    alternates: { canonical: 'https://carouselgem.com/tools' },
+};
+
+const hubFAQs = [
+    {
+        question: "What are the best Free AI LinkedIn Tools in 2026?",
+        answer: "The best free AI LinkedIn tools in 2026 include CarouselGem's suite: the Viral Post Generator, Text Formatter, Staircase Generator, Hashtag Generator, and QR Code Generator. These tools automate content creation without any subscriptions."
+    },
+    {
+        question: "Are these LinkedIn tools truly free?",
+        answer: "Yes. CarouselGem provides 15+ completely free utilities. No paywalls, hidden fees, or watermarks on the assets you generate."
+    },
+    {
+        question: "Do I need design skills to use these tools?",
+        answer: "No. All tools are designed for non-designers. Just enter your text or topic and the tool does the rest — from formatting to generation."
+    }
+];
+
+const hubFAQSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: hubFAQs.map(faq => ({
+        "@type": "Question",
+        name: faq.question,
+        acceptedAnswer: { "@type": "Answer", text: faq.answer },
+    })),
 };
 
 export default function ToolsIndexPage() {
-    // Group tools by category
     const categories = Array.from(new Set(TOOLS.map(t => t.category)));
 
-    const categoryIcons: Record<string, any> = {
-        'Writing': PenTool,
-        'Profile': Smartphone,
-        'Visuals': ImageIcon,
-        'Utility': QrCode
-    };
-
     return (
-        <main className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col relative">
+        <main className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(hubFAQSchema) }} />
             <Navbar />
 
-            {/* Global Background Decorations */}
-            <div className="fixed inset-0 -z-10 h-full w-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-40"></div>
-            <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl -z-10 opacity-20 blur-[120px] pointer-events-none">
-                <div className="absolute top-[20%] left-[10%] w-96 h-96 bg-blue-500/30 rounded-full animate-pulse"></div>
-                <div className="absolute top-[60%] right-[10%] w-96 h-96 bg-purple-500/30 rounded-full animate-pulse decoration-delay-2000"></div>
-            </div>
+            {/* ── Hero ── */}
+            <section className="pt-24 pb-10 px-4">
+                <div className="max-w-4xl mx-auto text-center space-y-4">
+                    <nav className="flex items-center justify-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                        <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
+                        <ChevronRight className="w-3 h-3 text-slate-300" />
+                        <span className="text-slate-600 dark:text-slate-300">Free Tools</span>
+                    </nav>
 
-            {/* Ultra-Modern Compact Hero Section */}
-            <section className="relative pt-24 pb-16 overflow-hidden">
-                <div className="container px-4 mx-auto relative">
-                    <div className="flex flex-col lg:flex-row items-center lg:items-end justify-between gap-12 max-w-6xl mx-auto">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/40 text-[10px] font-black uppercase tracking-widest text-blue-600">
+                        <Sparkles className="w-3 h-3" /> {TOOLS.length}+ Pro Utilities — Free Forever
+                    </div>
 
-                        <div className="text-center lg:text-left flex-1 space-y-6">
-                            <nav className="flex items-center justify-center lg:justify-start text-[10px] font-black uppercase tracking-widest text-slate-400 space-x-2">
-                                <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
-                                <ChevronRight className="w-3 h-3 text-slate-300" />
-                                <span className="text-slate-900 dark:text-white italic">Free Kit</span>
-                            </nav>
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter uppercase italic leading-tight">
+                        Power Up Your{' '}
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
+                            LinkedIn Growth.
+                        </span>
+                    </h1>
 
-                            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[0.85] uppercase italic">
-                                Power Up <br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 animate-gradient-x">Growth.</span>
-                            </h1>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto font-medium">
+                        Everything you need to create, optimize, and grow — no login, no limits, no cost.
+                    </p>
 
-                            <div className="inline-flex items-center rounded-full border border-blue-500/20 bg-blue-500/5 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 italic">
-                                <Sparkles className="w-3 h-3 mr-2" />
-                                15+ PRO Utilities
+                    {/* Quick stats */}
+                    <div className="flex items-center justify-center gap-6 pt-2">
+                        {[
+                            { label: 'AI Tools',      val: `${TOOLS.length}+` },
+                            { label: 'Always Free',   val: '100%' },
+                            { label: 'No Login',      val: '✓' },
+                        ].map(({ label, val }) => (
+                            <div key={label} className="text-center">
+                                <p className="text-lg font-black text-slate-800 dark:text-white">{val}</p>
+                                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">{label}</p>
                             </div>
-                        </div>
-
-                        <div className="flex-1 max-w-md text-center lg:text-right space-y-8">
-                            <p className="text-base md:text-lg text-slate-500 font-medium leading-relaxed">
-                                Everything you need to create, optimize, and grow.
-                                <span className="block text-slate-900 dark:text-white mt-1">Free forever. No login. No limits.</span>
-                            </p>
-
-                            <div className="flex items-center justify-center lg:justify-end gap-8">
-                                <div className="flex flex-col items-center lg:items-end">
-                                    <Zap className="w-5 h-5 text-amber-500 mb-2" />
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">AI Powered</span>
-                                </div>
-                                <div className="w-px h-8 bg-slate-200 dark:bg-slate-800"></div>
-                                <div className="flex flex-col items-center lg:items-end">
-                                    <ImageIcon className="w-5 h-5 text-blue-500 mb-2" />
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Export HD</span>
-                                </div>
-                            </div>
-                        </div>
-
+                        ))}
                     </div>
                 </div>
             </section>
 
-            {/* Tools Sections */}
-            <section className="py-24 relative">
-                <div className="container px-4 mx-auto max-w-6xl">
-                    <div className="space-y-32">
-                        {categories.map((category) => {
-                            const Icon = categoryIcons[category] || Layout;
-                            const categoryTools = TOOLS.filter(t => t.category === category);
-
-                            return (
-                                <div key={category} className="space-y-12">
-                                    <div className="flex items-end justify-between px-4">
-                                        <div className="space-y-2">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-lg bg-slate-900 dark:bg-white flex items-center justify-center text-white dark:text-black">
-                                                    <Icon className="w-4 h-4" />
-                                                </div>
-                                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-600 italic">Category</span>
-                                            </div>
-                                            <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase italic">{category}</h2>
-                                        </div>
-                                        <p className="hidden md:block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
-                                            {categoryTools.length} Utilities Available
-                                        </p>
+            {/* ── Tools Grid by Category ── */}
+            <section className="flex-1 pb-16 px-4">
+                <div className="max-w-6xl mx-auto space-y-12">
+                    {categories.map(category => {
+                        const categoryTools = TOOLS.filter(t => t.category === category);
+                        return (
+                            <div key={category}>
+                                {/* Category label */}
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-blue-600">{category}</span>
+                                        <span className="text-[9px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
+                                            {categoryTools.length}
+                                        </span>
                                     </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                                        {categoryTools.map((tool) => (
-                                            <Link key={tool.slug} href={`/tools/${tool.slug}`} className="group relative">
-                                                <div className={`h-full relative p-8 md:p-10 rounded-[2.5rem] bg-white/70 dark:bg-slate-900/60 backdrop-blur-md border border-white dark:border-slate-800/60 transition-all duration-500 hover:border-blue-500/40 hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-2 overflow-hidden flex flex-col items-start text-left shadow-[inset_0_1px_2px_rgba(255,255,255,1)] dark:shadow-none animate-in fade-in zoom-in duration-500`}>
-                                                    {/* Strong Themed Background Overlay */}
-                                                    <div className={`absolute inset-0 ${tool.bg} opacity-0 group-hover:opacity-[0.08] transition-opacity duration-500 -z-10`}></div>
-
-                                                    {/* Floating Glow Corner */}
-                                                    <div className={`absolute -right-12 -top-12 w-48 h-48 ${tool.bg} opacity-20 group-hover:opacity-40 rounded-full blur-3xl transition-all duration-700 active:scale-150`}></div>
-
-                                                    {/* Tool Icon */}
-                                                    <div className={`relative w-14 h-14 rounded-2xl ${tool.bg} flex items-center justify-center mb-8 ring-1 ring-white dark:ring-slate-800 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 z-10`}>
-                                                        <tool.icon className={`w-7 h-7 ${tool.color}`} />
-                                                    </div>
-
-                                                    <div className="relative z-10 w-full mb-auto">
-                                                        <h3 className="text-xl md:text-2xl font-black leading-tight tracking-tight uppercase italic mb-3 group-hover:text-blue-600 transition-colors duration-300">
-                                                            {tool.title}
-                                                        </h3>
-                                                        <p className="text-sm text-slate-600 dark:text-slate-400 font-medium leading-relaxed opacity-90 group-hover:opacity-100 transition-opacity">
-                                                            {tool.description}
-                                                        </p>
-                                                    </div>
-
-                                                    {/* Bottom Action */}
-                                                    <div className="relative z-10 w-full mt-8 pt-6 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Pro Utility</span>
-                                                        <div className="flex items-center gap-2 text-slate-900 dark:text-white">
-                                                            <span className="text-[10px] font-black uppercase tracking-widest opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">Launch Tool</span>
-                                                            <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 ring-4 ring-transparent group-hover:ring-blue-600/10 shadow-sm">
-                                                                <ArrowRight className="w-4 h-4" />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </Link>
-                                        ))}
-                                    </div>
+                                    <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800 ml-4" />
                                 </div>
-                            );
-                        })}
+
+                                {/* Tool cards — compact 4-column grid on desktop */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                                    {categoryTools.map(tool => (
+                                        <Link
+                                            key={tool.slug}
+                                            href={`/tools/${tool.slug}`}
+                                            className="group relative flex flex-col p-4 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 hover:border-blue-400/60 hover:shadow-lg hover:shadow-blue-500/5 hover:-translate-y-0.5 transition-all duration-300 overflow-hidden"
+                                        >
+                                            {/* Hover glow */}
+                                            <div className={`absolute inset-0 ${tool.bg} opacity-0 group-hover:opacity-[0.06] transition-opacity duration-300`} />
+
+                                            {/* Icon */}
+                                            <div className={`w-10 h-10 rounded-xl ${tool.bg} flex items-center justify-center mb-3 shrink-0 group-hover:scale-105 transition-transform duration-300`}>
+                                                <tool.icon className={`w-5 h-5 ${tool.color}`} />
+                                            </div>
+
+                                            {/* Text */}
+                                            <h2 className="text-sm font-black leading-tight tracking-tight mb-1.5 group-hover:text-blue-600 transition-colors duration-200 line-clamp-2">
+                                                {tool.title}
+                                            </h2>
+                                            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 flex-1">
+                                                {tool.description}
+                                            </p>
+
+                                            {/* Footer arrow */}
+                                            <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800">
+                                                <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Free</span>
+                                                <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                                                    <ArrowRight className="w-3 h-3" />
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </section>
+
+            {/* ── CTA Banner ── */}
+            <section className="px-4 pb-16">
+                <div className="max-w-4xl mx-auto p-8 rounded-3xl bg-gradient-to-br from-blue-900 via-indigo-900 to-slate-900 relative overflow-hidden border border-white/10 shadow-2xl">
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/30 rounded-full -translate-y-16 translate-x-16 blur-3xl" />
+                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/20 rounded-full translate-y-16 -translate-x-16 blur-3xl" />
+                    <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
+                        <div>
+                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/20 text-blue-200 text-[9px] font-black uppercase tracking-widest mb-3">
+                                <Sparkles className="w-3 h-3" /> #1 LinkedIn Carousel Maker
+                            </div>
+                            <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight uppercase italic mb-2">
+                                Create Viral Carousels in Seconds.
+                            </h2>
+                            <p className="text-blue-100/70 text-sm font-medium max-w-md">
+                                Turn any idea into a stunning, high-converting LinkedIn PDF carousel instantly.
+                            </p>
+                        </div>
+                        <Link href="/create" className="shrink-0">
+                            <button className="h-12 px-8 rounded-2xl text-sm font-black bg-white text-slate-900 hover:bg-slate-100 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5 whitespace-nowrap">
+                                Start Designing Free
+                            </button>
+                        </Link>
                     </div>
+                </div>
+            </section>
+
+            {/* ── FAQ ── */}
+            <section className="px-4 pb-16">
+                <div className="max-w-3xl mx-auto">
+                    <FAQ faqs={hubFAQs} />
+                </div>
+            </section>
+
+            {/* ── SEO content ── */}
+            <section className="px-4 pb-16 border-t border-slate-200 dark:border-slate-800 pt-12">
+                <div className="max-w-3xl mx-auto">
+                    <article className="prose prose-slate dark:prose-invert max-w-none text-sm text-slate-600 dark:text-slate-400">
+                        <h2 className="text-xl font-black italic uppercase tracking-tight text-slate-900 dark:text-white">
+                            The Ultimate Suite of Free AI LinkedIn Tools in 2026
+                        </h2>
+                        <p>
+                            Whether you&apos;re a Top Voice, a B2B SaaS founder, or an ambitious professional, our <strong>Free AI LinkedIn Tools</strong> help you dominate the feed. From formatting text with Unicode bold/italic to generating viral posts with AI — everything is free, instant, and requires no login.
+                        </p>
+                        <h3 className="text-base font-bold uppercase tracking-tight mt-6">Why Use CarouselGem Tools?</h3>
+                        <p>
+                            Writing viral posts, formatting text perfectly, and designing carousels used to require a dedicated agency. CarouselGem eliminates the friction with 15+ free utilities — from Text Staircases to Flesch-Kincaid readability analysis — all powered by AI and available instantly.
+                        </p>
+                    </article>
                 </div>
             </section>
 

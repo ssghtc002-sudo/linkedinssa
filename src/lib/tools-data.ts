@@ -3,7 +3,7 @@ import { Type, Image, FileText, Video, Smartphone, PenTool, Layout, Grid, QrCode
 export const TOOLS = [
     {
         slug: 'linkedin-post-generator',
-        title: 'LinkedIn Post Generator',
+        title: 'Free AI LinkedIn Post Generator',
         description: 'Free AI tool to write viral LinkedIn posts in seconds. Generate professional content for any topic.',
         icon: PenTool,
         category: 'Writing',

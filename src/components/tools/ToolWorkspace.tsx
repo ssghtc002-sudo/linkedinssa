@@ -1,7 +1,11 @@
 'use client';
 
 import { PostGenerator } from './generators/PostGenerator';
+import { LinkedInPostGenerator } from './generators/LinkedInPostGenerator';
+import { LinkedInHeadlineGenerator } from './generators/LinkedInHeadlineGenerator';
+import { LinkedInSummaryGenerator } from './generators/LinkedInSummaryGenerator';
 import { TextFormatter } from './formatters/TextFormatter';
+import { StaircaseGenerator } from './formatters/StaircaseGenerator';
 import { PostPreview } from './simulators/PostPreview';
 import { QRCodeGenerator } from './generators/QRCodeGenerator';
 import { QuoteCardGenerator } from './generators/QuoteCardGenerator';
@@ -20,14 +24,14 @@ import { Wrench as ToolIcon } from 'lucide-react';
 export const ToolWorkspace = ({ slug }: { slug: string }) => {
 
     // AI Content Generators (PostGenerator handles all 3 types)
-    if (slug === 'linkedin-post-generator') return <PostGenerator type="post" />;
-    if (slug === 'linkedin-headline-generator') return <PostGenerator type="headline" />;
-    if (slug === 'linkedin-summary-generator') return <PostGenerator type="summary" />;
+    if (slug === 'linkedin-post-generator') return <LinkedInPostGenerator />;
+    if (slug === 'linkedin-headline-generator') return <LinkedInHeadlineGenerator />;
+    if (slug === 'linkedin-summary-generator') return <LinkedInSummaryGenerator />;
     if (slug === 'linkedin-hashtag-generator') return <LinkedInHashtagGenerator />;
 
-    // Text Formatters (TextFormatter handles both regular formatting and staircase)
+    // Text Formatters
     if (slug === 'linkedin-post-text-formatter') return <TextFormatter />;
-    if (slug === 'linkedin-text-staircase-generator') return <TextFormatter />;
+    if (slug === 'linkedin-text-staircase-generator') return <StaircaseGenerator />;
 
     // Visual Generators
     if (slug === 'linkedin-qr-code-generator') return <QRCodeGenerator />;
