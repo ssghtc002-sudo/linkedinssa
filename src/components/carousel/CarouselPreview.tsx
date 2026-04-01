@@ -107,36 +107,52 @@ const SlideRenderer: React.FC<{
                 }`} style={{ padding: `${settings.padding * (isMobile ? 2.5 : 3.5)}px` }}>
 
                 <div className={`flex-1 flex flex-col w-full ${slide.layout === 'quote' ? 'justify-center' : 'justify-center'}`}>
+                    {/* Tagline / Eyebrow */}
+                    {slide.showTagline && slide.tagline && (
+                        <div 
+                            className="font-bold tracking-[0.2em] uppercase opacity-80" 
+                            style={{
+                                color: settings.accentColor,
+                                fontSize: isMobile ? '0.65em' : '0.8em',
+                                marginBottom: isMobile ? '0.5em' : '0.8em',
+                                fontFamily: FONT_PAIRS[settings.fontPair].body
+                            }}
+                        >
+                            {slide.tagline}
+                        </div>
+                    )}
+
                     {/* Title */}
-                    {slide.layout !== 'quote' && (
-                        <h2 className="font-bold leading-tight drop-shadow-sm line-clamp-3 tracking-tight" style={{
+                    {slide.layout !== 'quote' && slide.showTitle !== false && slide.title && (
+                        <h2 className="font-bold leading-[1.1] drop-shadow-sm tracking-tight" style={{
                             ...getHeadingStyle(settings),
-                            marginBottom: isMobile ? '0.5em' : '0.6em' // Use ems for relative
+                            marginBottom: slide.showContent !== false ? (isMobile ? '0.4em' : '0.5em') : '0' 
                         }}>
                             {slide.title}
                         </h2>
                     )}
 
                     {/* Content */}
-                    {slide.layout === 'list' ? (
-                        <ul className={`w-full ${isMobile ? 'space-y-[0.5em]' : 'space-y-[0.8em]'}`}>
-                            {slide.content.split('\\n').filter(line => line.trim()).map((line, i) => (
-                                <li key={i} className="flex items-start gap-[0.5em]" style={{
-                                    fontSize: isMobile
-                                        ? (settings.fontSize === 'small' ? '0.9em' : settings.fontSize === 'large' ? '1.2em' : '1em')
-                                        : (settings.fontSize === 'small' ? '1em' : settings.fontSize === 'large' ? '1.4em' : '1.2em'),
-                                    color: settings.textColor
-                                }}>
-                                    <div className="mt-[0.4em] w-[0.4em] h-[0.4em] rounded-full flex-shrink-0" style={{ backgroundColor: settings.accentColor }} />
-                                    <span className="flex-1 opacity-90 font-medium">{line.trim().replace(/^[-*•]\s*/, '')}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <div className="relative">
-                            {slide.layout === 'quote' && (
-                                <span className="absolute -left-[0.2em] -top-[0.4em] opacity-20 font-serif leading-none select-none" style={{ color: settings.accentColor, fontSize: '4em' }}>"</span>
-                            )}
+                    {slide.showContent !== false && slide.content && (
+                        slide.layout === 'list' ? (
+                            <ul className={`w-full ${isMobile ? 'space-y-[0.5em]' : 'space-y-[0.8em]'}`}>
+                                {slide.content.split('\\n').filter(line => line.trim()).map((line, i) => (
+                                    <li key={i} className="flex items-start gap-[0.5em]" style={{
+                                        fontSize: isMobile
+                                            ? (settings.fontSize === 'small' ? '0.9em' : settings.fontSize === 'large' ? '1.2em' : '1em')
+                                            : (settings.fontSize === 'small' ? '1em' : settings.fontSize === 'large' ? '1.4em' : '1.2em'),
+                                        color: settings.textColor
+                                    }}>
+                                        <div className="mt-[0.4em] w-[0.4em] h-[0.4em] rounded-full flex-shrink-0" style={{ backgroundColor: settings.accentColor }} />
+                                        <span className="flex-1 opacity-90 font-medium">{line.trim().replace(/^[-*•]\s*/, '')}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <div className="relative">
+                                {slide.layout === 'quote' && (
+                                    <span className="absolute -left-[0.2em] -top-[0.4em] opacity-20 font-serif leading-none select-none" style={{ color: settings.accentColor, fontSize: '4em' }}>"</span>
+                                ) }
                             <p
                                 className={`opacity-90 whitespace-pre-wrap ${slide.layout === 'quote'
                                     ? 'italic font-serif leading-relaxed'
@@ -154,26 +170,48 @@ const SlideRenderer: React.FC<{
                             >
                                 {slide.content}
                             </p>
-                            {slide.layout === 'quote' && (
-                                <div className="font-bold opacity-80 not-italic sans-serif tracking-widest uppercase mt-[1em]" style={{ color: settings.accentColor, fontSize: '0.6em' }}>
+                            {slide.layout === 'quote' && slide.showTitle !== false && (
+                                <div className="font-bold opacity-80 not-italic tracking-widest uppercase mt-[1em]" style={{ color: settings.accentColor, fontSize: '0.6em', fontFamily: FONT_PAIRS[settings.fontPair].body }}>
                                     {slide.title !== 'New Slide' ? slide.title : ''}
                                 </div>
                             )}
                         </div>
+                        )
                     )}
                 </div>
 
-                <div className="w-full flex justify-between items-end border-t border-[rgba(0,0,0,0.1)] opacity-60 mt-[1em] pt-[0.5em]">
+                {/* Footer elements (Watermark, Swipe, Pagination) */}
+                <div className="w-full flex justify-between items-end border-[rgba(0,0,0,0.1)] pt-[0.5em] mt-[1em] relative z-20">
+                    {/* Watermark */}
                     <div className="flex items-center gap-[0.5em]">
                         {settings.showWatermark && (
-                            <div className="leading-none">
-                                <div className="font-bold tracking-wide uppercase" style={{ fontSize: '0.7em' }}>{settings.authorName}</div>
-                                <div className="opacity-70" style={{ fontSize: '0.6em' }}>{settings.authorHandle}</div>
+                            <div className="flex items-center gap-[0.5em]">
+                                {settings.authorImage && (
+                                    <img src={settings.authorImage} alt="" className="rounded-full object-cover" style={{ width: '1.5em', height: '1.5em' }} />
+                                )}
+                                <div className="leading-tight opacity-90">
+                                    <div className="font-bold tracking-wide" style={{ fontSize: '0.7em', fontFamily: FONT_PAIRS[settings.fontPair].body }}>{settings.authorName}</div>
+                                    <div className="opacity-70" style={{ fontSize: '0.55em', fontFamily: FONT_PAIRS[settings.fontPair].body }}>{settings.authorHandle}</div>
+                                </div>
                             </div>
                         )}
                     </div>
-                    <div className="flex items-center gap-1 font-mono font-bold opacity-50" style={{ fontSize: '0.7em' }}>
-                        <span>{index + 1}</span><span className="opacity-40">/</span><span>{totalSlides}</span>
+                    
+                    {/* Center: Swipe Indicator */}
+                    {(slide.showSwipeIndicator !== false && settings.showSwipeIndicator) && index < totalSlides - 1 && (
+                        <div className="absolute left-1/2 -translate-x-1/2 bottom-0 flex items-center gap-[0.3em] opacity-60 font-medium" style={{ fontSize: '0.7em', color: settings.textColor }}>
+                            {(settings.swipeIndicatorType === 'text' || settings.swipeIndicatorType === 'both') && (
+                                <span>{slide.swipeText || 'Swipe'}</span>
+                            )}
+                            {(settings.swipeIndicatorType === 'arrow' || settings.swipeIndicatorType === 'both') && (
+                                <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Right: Pagination */}
+                    <div className="flex items-center gap-[0.2em] font-mono font-bold opacity-40 hover:opacity-100 transition-opacity" style={{ fontSize: '0.75em', color: settings.textColor }}>
+                        <span>{index + 1}</span><span className="opacity-30">/</span><span>{totalSlides}</span>
                     </div>
                 </div>
             </div>

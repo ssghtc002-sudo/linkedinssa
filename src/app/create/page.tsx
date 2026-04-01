@@ -1,30 +1,27 @@
 'use client';
 
-import CarouselEditor from '@/components/carousel/CarouselEditor';
+import { EditorLayoutV5 } from "@/components/carousel/v5/EditorLayout";
 import { useSearchParams } from 'next/navigation';
 import { useEffect, Suspense } from 'react';
 
-// Wrapper to handle Suspense for useSearchParams
 function EditorContent() {
     const searchParams = useSearchParams();
     const topic = searchParams.get('topic');
 
+    // Here you could automatically fire off an AI generation if 'topic' exists
     useEffect(() => {
         if (topic) {
-            // In a real app, we would trigger the AI generation here.
-            console.log("Auto-generating for topic:", topic);
-            // We could find the input field and populate it, or pass a prop to Editor.
-            // For now, we'll just acknowledge it.
+            console.log('Generating for topic:', topic);
         }
     }, [topic]);
 
-    return <CarouselEditor />;
+    return <EditorLayoutV5 />;
 }
 
 export default function CreatePage() {
     return (
-        <main className="min-h-screen bg-background">
-            <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading editor...</div>}>
+        <main className="w-screen h-screen overflow-hidden bg-background">
+            <Suspense fallback={<div className="flex items-center justify-center h-screen text-muted-foreground animate-pulse">Initializing Studio V5...</div>}>
                 <EditorContent />
             </Suspense>
         </main>

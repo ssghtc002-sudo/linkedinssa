@@ -1,302 +1,367 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Slide, DesignSettings, DEFAULT_SLIDES, DEFAULT_DESIGN } from '@/lib/types';
-import { SlideList } from './SlideList';
-import { DesignControls } from './DesignControls';
-import { EditorPreview } from './EditorPreview';
-import { EditorSidebar } from './EditorSidebar';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Sparkles, Layout, Palette, Settings2, Menu, Loader2, Download, FileType, Image as ImageIcon, Copy, Check, Share2, Home, ChevronRight, Cloud, Save, User, Bell, ChevronDown } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
-import { Input } from '@/components/ui/input';
-import { CarouselPreview, CarouselPreviewRef } from './CarouselPreview';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { ExportEngine } from './ExportEngine';
+import { CarouselPreviewRef } from './CarouselPreview';
 import { toast } from 'sonner';
-import { Undo2, Redo2, Command, Keyboard } from 'lucide-react';
+
+// ── Editor sub-components ─────────────────────────────────────────────────────
+import { EditorTopBar } from './editor/EditorTopBar';
+import { EditorLeftPanel } from './editor/EditorLeftPanel';
+import { EditorRightPanel } from './editor/EditorRightPanel';
+import { EditorCanvas } from './editor/EditorCanvas';
+import { EditorBottomBar } from './editor/EditorBottomBar';
+import { EditorCommandPalette } from './editor/EditorCommandPalette';
+
+// Mobile panel types
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
+
+type MobileTab = 'slides' | 'preview' | 'ai' | 'design' | 'export';
 
 export default function CarouselEditor() {
-    const searchParams = useSearchParams();
-    const topicParam = searchParams.get('topic');
-
+    // ── Core State ──────────────────────────────────────────────────────────
     const [slides, setSlides] = useState<Slide[]>(DEFAULT_SLIDES);
     const [settings, setSettings] = useState<DesignSettings>(DEFAULT_DESIGN);
-    const [activeTab, setActiveTab] = useState('content');
-    const [isGenerating, setIsGenerating] = useState(false);
-    const [topicInput, setTopicInput] = useState('');
-
-    // Pro State
     const [projectTitle, setProjectTitle] = useState('Untitled Carousel');
+
+    // ── AI State ────────────────────────────────────────────────────────────
+    const [topicInput, setTopicInput] = useState('');
     const [aiTone, setAiTone] = useState('professional');
     const [aiLength, setAiLength] = useState('medium');
-    const [commandOpen, setCommandOpen] = useState(false);
-    const [lastSaved, setLastSaved] = useState<Date>(new Date());
+    const [isGenerating, setIsGenerating] = useState(false);
 
-    // History Management (Undo/Redo)
-    const [history, setHistory] = useState<{ slides: Slide[], settings: DesignSettings }[]>([{ slides: DEFAULT_SLIDES, settings: DEFAULT_DESIGN }]);
+    // ── History (Undo/Redo) ─────────────────────────────────────────────────
+    const [history, setHistory] = useState<{ slides: Slide[]; settings: DesignSettings }[]>([
+        { slides: DEFAULT_SLIDES, settings: DEFAULT_DESIGN },
+    ]);
     const [historyIndex, setHistoryIndex] = useState(0);
 
-    // Resizable Sidebar State
-    const [sidebarWidth, setSidebarWidth] = useState(380);
-    const [isResizing, setIsResizing] = useState(false);
+    // ── UI State ────────────────────────────────────────────────────────────
+    const [commandOpen, setCommandOpen] = useState(false);
+    const [lastSaved, setLastSaved] = useState<Date | null>(new Date());
+    const [isSaving, setIsSaving] = useState(false);
+    const [mobileTab, setMobileTab] = useState<MobileTab>('preview');
 
-    useEffect(() => {
-        if (topicParam) {
-            setTopicInput(topicParam);
-            handleAiGenerate(topicParam);
-        }
-    }, [topicParam]);
+    // ── Sidebar Resize (Desktop) ────────────────────────────────────────────
+    const [leftWidth, setLeftWidth] = useState(300);
+    const [rightWidth, setRightWidth] = useState(264);
+    const [isResizingLeft, setIsResizingLeft] = useState(false);
 
-    // Handle Resizing
-    const startResizing = React.useCallback((mouseDownEvent: React.MouseEvent) => {
-        setIsResizing(true);
-    }, []);
+    const previewRef = useRef<CarouselPreviewRef>(null);
 
-    const stopResizing = React.useCallback(() => {
-        setIsResizing(false);
-    }, []);
-
-    const resize = React.useCallback(
-        (mouseMoveEvent: MouseEvent) => {
-            if (isResizing) {
-                const newWidth = mouseMoveEvent.clientX;
-                if (newWidth > 300 && newWidth < 800) { // Min/Max constraints
-                    setSidebarWidth(newWidth);
-                }
-            }
+    // ── History Helpers ──────────────────────────────────────────────────────
+    const pushHistory = useCallback(
+        (newSlides: Slide[], newSettings: DesignSettings) => {
+            const newHistory = history.slice(0, historyIndex + 1);
+            newHistory.push({ slides: newSlides, settings: newSettings });
+            if (newHistory.length > 50) newHistory.shift();
+            setHistory(newHistory);
+            setHistoryIndex(newHistory.length - 1);
         },
-        [isResizing]
+        [history, historyIndex]
     );
 
-    useEffect(() => {
-        window.addEventListener("mousemove", resize);
-        window.addEventListener("mouseup", stopResizing);
-        return () => {
-            window.removeEventListener("mousemove", resize);
-            window.removeEventListener("mouseup", stopResizing);
-        };
-    }, [resize, stopResizing]);
-
-    // Save to History
-    const saveToHistory = React.useCallback((newSlides: Slide[], newSettings: DesignSettings) => {
-        const newHistory = history.slice(0, historyIndex + 1);
-        newHistory.push({ slides: newSlides, settings: newSettings });
-        // Keep only last 50 states
-        if (newHistory.length > 50) newHistory.shift();
-        setHistory(newHistory);
-        setHistoryIndex(newHistory.length - 1);
-    }, [history, historyIndex]);
-
-    // Undo/Redo
-    const undo = React.useCallback(() => {
+    const undo = useCallback(() => {
         if (historyIndex > 0) {
-            const newIndex = historyIndex - 1;
-            setHistoryIndex(newIndex);
-            setSlides(history[newIndex].slides);
-            setSettings(history[newIndex].settings);
+            const idx = historyIndex - 1;
+            setHistoryIndex(idx);
+            setSlides(history[idx].slides);
+            setSettings(history[idx].settings);
             toast.success('Undone');
         }
     }, [historyIndex, history]);
 
-    const redo = React.useCallback(() => {
+    const redo = useCallback(() => {
         if (historyIndex < history.length - 1) {
-            const newIndex = historyIndex + 1;
-            setHistoryIndex(newIndex);
-            setSlides(history[newIndex].slides);
-            setSettings(history[newIndex].settings);
+            const idx = historyIndex + 1;
+            setHistoryIndex(idx);
+            setSlides(history[idx].slides);
+            setSettings(history[idx].settings);
             toast.success('Redone');
         }
     }, [historyIndex, history]);
 
-    // Auto-save simulation
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setLastSaved(new Date());
-        }, 2000);
-        return () => clearTimeout(timer);
-    }, [slides, settings]);
+    const canUndo = historyIndex > 0;
+    const canRedo = historyIndex < history.length - 1;
 
-    // Keyboard Shortcuts
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            // Command Palette: Cmd/Ctrl + K
-            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-                e.preventDefault();
-                setCommandOpen(true);
-            }
-            // Undo: Cmd/Ctrl + Z
-            if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey) {
-                e.preventDefault();
-                undo();
-            }
-            // Redo: Cmd/Ctrl + Shift + Z
-            if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'z') {
-                e.preventDefault();
-                redo();
-            }
-            // Save: Cmd/Ctrl + S
-            if ((e.metaKey || e.ctrlKey) && e.key === 's') {
-                e.preventDefault();
-                toast.success('Project saved!');
-            }
-        };
+    // ── Update Helpers ───────────────────────────────────────────────────────
+    const updateSlides = (newSlides: Slide[]) => {
+        setSlides(newSlides);
+        pushHistory(newSlides, settings);
+    };
 
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [undo, redo]);
+    const updateSlide = (id: string, field: keyof Slide, value: any) => {
+        const newSlides = slides.map(s => s.id === id ? { ...s, [field]: value } : s);
+        updateSlides(newSlides);
+    };
 
     const updateSettings = (key: keyof DesignSettings, value: any) => {
         const newSettings = { ...settings, [key]: value };
         setSettings(newSettings);
-        saveToHistory(slides, newSettings);
+        pushHistory(slides, newSettings);
     };
 
-    const updateSlides = (newSlides: Slide[]) => {
-        setSlides(newSlides);
-        saveToHistory(newSlides, settings);
-    };
+    // ── Auto-save ────────────────────────────────────────────────────────────
+    useEffect(() => {
+        setIsSaving(true);
+        const t = setTimeout(() => {
+            setLastSaved(new Date());
+            setIsSaving(false);
+        }, 1500);
+        return () => clearTimeout(t);
+    }, [slides, settings]);
 
+    // ── Keyboard Shortcuts ───────────────────────────────────────────────────
+    useEffect(() => {
+        const handler = (e: KeyboardEvent) => {
+            const mod = e.metaKey || e.ctrlKey;
+            if (mod && e.key === 'k') { e.preventDefault(); setCommandOpen(true); }
+            if (mod && !e.shiftKey && e.key === 'z') { e.preventDefault(); undo(); }
+            if (mod && e.shiftKey && e.key === 'z') { e.preventDefault(); redo(); }
+            if (mod && e.key === 's') { e.preventDefault(); toast.success('Saved!'); }
+        };
+        window.addEventListener('keydown', handler);
+        return () => window.removeEventListener('keydown', handler);
+    }, [undo, redo]);
+
+    // ── Left Sidebar Resizing ────────────────────────────────────────────────
+    useEffect(() => {
+        const onMove = (e: MouseEvent) => {
+            if (!isResizingLeft) return;
+            const w = e.clientX;
+            if (w > 240 && w < 500) setLeftWidth(w);
+        };
+        const onUp = () => setIsResizingLeft(false);
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onUp);
+        return () => {
+            window.removeEventListener('mousemove', onMove);
+            window.removeEventListener('mouseup', onUp);
+        };
+    }, [isResizingLeft]);
+
+    // ── AI Generation ────────────────────────────────────────────────────────
     const handleAiGenerate = async (topic: string) => {
-        if (!topic) return;
+        if (!topic.trim()) return;
         setIsGenerating(true);
-
         try {
-            const response = await fetch('/api/generate', {
+            const res = await fetch('/api/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'carousel',
-                    topic,
-                    tone: aiTone,
-                    length: aiLength
-                }),
+                body: JSON.stringify({ type: 'carousel', topic, tone: aiTone, length: aiLength }),
             });
-
-            if (!response.ok) throw new Error('Failed to generate slides');
-            const data = await response.json();
-
+            if (!res.ok) throw new Error('Generation failed');
+            const data = await res.json();
             if (data.slides && Array.isArray(data.slides)) {
-                setSlides(data.slides);
-                setActiveTab('content');
-
+                updateSlides(data.slides);
                 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-                const cleanTopic = cap(topic);
-                setProjectTitle(cleanTopic + (aiTone === 'viral' ? ' [Viral]' : ' Guide'));
-
-                toast.success('Carousel generated successfully!');
+                setProjectTitle(cap(topic) + (aiTone === 'viral' ? ' [Viral]' : ' Guide'));
+                toast.success(`Generated ${data.slides.length} slides!`);
+                setMobileTab('preview');
             } else {
-                throw new Error('Invalid data format received');
+                throw new Error('Invalid response format');
             }
-        } catch (error: any) {
-            console.error('AI Generation Error:', error);
-            toast.error(error.message || 'Failed to generate carousel');
+        } catch (err: any) {
+            toast.error(err.message || 'Failed to generate');
         } finally {
             setIsGenerating(false);
         }
     };
 
+    // ── Export ────────────────────────────────────────────────────────────────
+    const handleExport = async (format: 'pdf' | 'png', ratio: '1:1' | '4:5') => {
+        const exportSettings = { ...settings, aspectRatio: ratio };
+        const engine = new ExportEngine(slides, exportSettings);
+        const label = format === 'pdf' ? 'PDF' : 'PNGs';
+        toast.loading(`Exporting ${label}...`);
+        try {
+            if (format === 'pdf') await engine.exportPDF();
+            else await engine.exportPNGs();
+            toast.dismiss();
+            toast.success(`${label} exported!`);
+        } catch {
+            toast.dismiss();
+            toast.error('Export failed');
+        }
+    };
 
-    const previewRef = React.useRef<CarouselPreviewRef>(null);
-
-    // ... existing functions
-
+    // ── Render ────────────────────────────────────────────────────────────────
     return (
-        <div className="relative flex h-screen overflow-hidden select-none bg-background text-foreground">
-            {/* Colorful Background Effects */}
-            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-500/20 blur-[100px] animate-pulse" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-purple-500/20 blur-[100px] animate-pulse delay-1000" />
-                <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-pink-500/20 blur-[80px] animate-pulse delay-2000" />
+        <div className="flex flex-col h-screen overflow-hidden bg-background text-foreground select-none">
+
+            {/* Ambient glows */}
+            <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+                <div className="absolute top-[-20%] left-[-10%] w-[55%] h-[55%] rounded-full bg-blue-500/8 blur-[140px] animate-pulse" />
+                <div className="absolute bottom-[-20%] right-[-10%] w-[55%] h-[55%] rounded-full bg-purple-500/8 blur-[140px] animate-pulse [animation-delay:1.5s]" />
             </div>
 
-            {/* Glass Container Wrapper */}
-            <div className="z-10 flex w-full h-full bg-white/10 dark:bg-black/10 backdrop-blur-[1px]">
-                {/* Left Sidebar - Resizable & Glassmorphic */}
-                <EditorSidebar
-                    width={sidebarWidth}
-                    startResizing={startResizing}
-                    isResizing={isResizing}
-                    slides={slides}
-                    updateSlides={setSlides}
-                    settings={settings}
-                    updateSettings={updateSettings}
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
+            {/* Top bar */}
+            <div className="relative z-20">
+                <EditorTopBar
                     projectTitle={projectTitle}
                     setProjectTitle={setProjectTitle}
-                    undo={undo}
-                    redo={redo}
-                    canUndo={historyIndex > 0}
-                    canRedo={historyIndex < history.length - 1}
-                    aiTone={aiTone}
-                    setAiTone={setAiTone}
-                    aiLength={aiLength}
-                    setAiLength={setAiLength}
-                    onAiGenerate={handleAiGenerate}
-                    isGenerating={isGenerating}
-                    topicInput={topicInput}
-                    setTopicInput={setTopicInput}
-                    setCommandOpen={setCommandOpen}
-                    previewRef={previewRef}
+                    canUndo={canUndo}
+                    canRedo={canRedo}
+                    onUndo={undo}
+                    onRedo={redo}
+                    lastSaved={lastSaved}
+                    onExport={handleExport}
+                    onCommandOpen={() => setCommandOpen(true)}
+                    isSaving={isSaving}
                 />
+            </div>
 
-                {/* Main Preview Area */}
-                <EditorPreview
-                    sidebarWidth={sidebarWidth}
-                    setSidebarWidth={setSidebarWidth}
+            {/* ── Desktop 3-panel layout ───────────────────────────────── */}
+            <main className="hidden md:flex flex-1 min-h-0 overflow-hidden relative z-10">
+
+                {/* Left Panel */}
+                <div
+                    className="shrink-0 flex flex-col border-r border-white/10 dark:border-white/5 bg-white/50 dark:bg-slate-950/50 backdrop-blur-2xl shadow-xl z-20 relative"
+                    style={{ width: leftWidth }}
+                >
+                    <EditorLeftPanel
+                        topicInput={topicInput}
+                        setTopicInput={setTopicInput}
+                        aiTone={aiTone}
+                        setAiTone={setAiTone}
+                        aiLength={aiLength}
+                        setAiLength={setAiLength}
+                        onAiGenerate={handleAiGenerate}
+                        isGenerating={isGenerating}
+                        slides={slides}
+                        setSlides={updateSlides}
+                    />
+
+                    {/* Resize handle */}
+                    <div
+                        className={`absolute right-0 top-0 w-1 h-full cursor-col-resize z-50 translate-x-[50%] group hover:bg-blue-500/40 transition-colors ${isResizingLeft ? 'bg-blue-500/50' : ''}`}
+                        onMouseDown={() => setIsResizingLeft(true)}
+                    >
+                        <div className="absolute top-1/2 left-0 -translate-x-1/2 w-1.5 h-10 bg-border/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                </div>
+
+                {/* Center Canvas */}
+                <EditorCanvas
                     slides={slides}
                     settings={settings}
                     previewRef={previewRef}
+                    onExport={handleExport}
+                    onUpdateSlide={updateSlide}
                 />
 
-                {/* Command Palette */}
-                <CommandDialog open={commandOpen} onOpenChange={setCommandOpen}>
-                    <CommandInput placeholder="Type a command or search..." />
-                    <CommandList>
-                        <CommandEmpty>No results found.</CommandEmpty>
-                        <CommandGroup heading="Actions">
-                            <CommandItem onSelect={() => { handleAiGenerate(topicInput || 'Content Marketing'); setCommandOpen(false); }}>
-                                <Sparkles className="mr-2 h-4 w-4" />
-                                <span>Generate AI Carousel</span>
-                            </CommandItem>
-                            <CommandItem onSelect={() => { previewRef.current?.downloadPDF(); setCommandOpen(false); }}>
-                                <Download className="mr-2 h-4 w-4" />
-                                <span>Export as PDF</span>
-                            </CommandItem>
-                            <CommandItem onSelect={() => { previewRef.current?.downloadPNGs(); setCommandOpen(false); }}>
-                                <ImageIcon className="mr-2 h-4 w-4" />
-                                <span>Export as PNG</span>
-                            </CommandItem>
-                        </CommandGroup>
-                        <CommandGroup heading="Edit">
-                            <CommandItem onSelect={() => { undo(); setCommandOpen(false); }} disabled={historyIndex === 0}>
-                                <Undo2 className="mr-2 h-4 w-4" />
-                                <span>Undo</span>
-                                <span className="ml-auto text-xs text-muted-foreground">Ctrl+Z</span>
-                            </CommandItem>
-                            <CommandItem onSelect={() => { redo(); setCommandOpen(false); }} disabled={historyIndex === history.length - 1}>
-                                <Redo2 className="mr-2 h-4 w-4" />
-                                <span>Redo</span>
-                                <span className="ml-auto text-xs text-muted-foreground">Ctrl+Shift+Z</span>
-                            </CommandItem>
-                        </CommandGroup>
-                        <CommandGroup heading="View">
-                            <CommandItem onSelect={() => { setActiveTab('content'); setCommandOpen(false); }}>
-                                <Menu className="mr-2 h-4 w-4" />
-                                <span>Content Tab</span>
-                            </CommandItem>
-                            <CommandItem onSelect={() => { setActiveTab('design'); setCommandOpen(false); }}>
-                                <Palette className="mr-2 h-4 w-4" />
-                                <span>Design Tab</span>
-                            </CommandItem>
-                        </CommandGroup>
-                    </CommandList>
-                </CommandDialog>
-            </div>
+                {/* Right Panel */}
+                <div
+                    className="shrink-0 flex flex-col bg-white/50 dark:bg-slate-950/50 backdrop-blur-2xl shadow-xl z-20"
+                    style={{ width: rightWidth }}
+                >
+                    <EditorRightPanel settings={settings} updateSettings={updateSettings} />
+                </div>
+            </main>
+
+            {/* ── Mobile panel area ────────────────────────────────────── */}
+            <main className="md:hidden flex-1 flex flex-col min-h-0 overflow-hidden relative z-10">
+
+                {/* Preview panel */}
+                <div className={cn("flex-1 flex flex-col min-h-0", mobileTab !== 'preview' ? 'hidden' : '')}>
+                    <EditorCanvas
+                        slides={slides}
+                        settings={settings}
+                        previewRef={previewRef}
+                        onExport={handleExport}
+                        onUpdateSlide={updateSlide}
+                    />
+                </div>
+
+                {/* Slides panel */}
+                {mobileTab === 'slides' && (
+                    <div className="flex-1 flex flex-col min-h-0 bg-white/60 dark:bg-slate-950/60 backdrop-blur-xl overflow-hidden">
+                        <EditorLeftPanel
+                            topicInput={topicInput}
+                            setTopicInput={setTopicInput}
+                            aiTone={aiTone}
+                            setAiTone={setAiTone}
+                            aiLength={aiLength}
+                            setAiLength={setAiLength}
+                            onAiGenerate={handleAiGenerate}
+                            isGenerating={isGenerating}
+                            slides={slides}
+                            setSlides={updateSlides}
+                        />
+                    </div>
+                )}
+
+                {/* AI panel (mobile) */}
+                {mobileTab === 'ai' && (
+                    <div className="flex-1 flex flex-col min-h-0 bg-white/60 dark:bg-slate-950/60 backdrop-blur-xl overflow-hidden">
+                        {/* Show AI panel from left panel but with AI open */}
+                        <EditorLeftPanel
+                            topicInput={topicInput}
+                            setTopicInput={setTopicInput}
+                            aiTone={aiTone}
+                            setAiTone={setAiTone}
+                            aiLength={aiLength}
+                            setAiLength={setAiLength}
+                            onAiGenerate={handleAiGenerate}
+                            isGenerating={isGenerating}
+                            slides={slides}
+                            setSlides={updateSlides}
+                            hideSlides={true}
+                        />
+                    </div>
+                )}
+
+                {/* Design panel */}
+                {mobileTab === 'design' && (
+                    <div className="flex-1 flex flex-col min-h-0 bg-white/60 dark:bg-slate-950/60 backdrop-blur-xl overflow-hidden">
+                        <EditorRightPanel settings={settings} updateSettings={updateSettings} />
+                    </div>
+                )}
+
+                {/* Export panel */}
+                {mobileTab === 'export' && (
+                    <div className="flex-1 flex flex-col items-center justify-center gap-4 p-6 bg-white/60 dark:bg-slate-950/60 backdrop-blur-xl">
+                        <p className="text-sm font-bold">Export Carousel</p>
+                        <div className="w-full max-w-xs space-y-2">
+                            {[
+                                { label: 'Square PDF (1:1)', f: 'pdf' as const, r: '1:1' as const },
+                                { label: 'Square PNGs (1:1)', f: 'png' as const, r: '1:1' as const },
+                                { label: 'Portrait PDF (4:5)', f: 'pdf' as const, r: '4:5' as const },
+                                { label: 'Portrait PNGs (4:5)', f: 'png' as const, r: '4:5' as const },
+                            ].map((opt) => (
+                                <button
+                                    key={opt.label}
+                                    onClick={() => handleExport(opt.f, opt.r)}
+                                    className="w-full h-11 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all"
+                                >
+                                    {opt.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </main>
+
+            {/* Mobile Bottom Bar */}
+            <EditorBottomBar
+                activeTab={mobileTab}
+                onTabChange={setMobileTab}
+                isGenerating={isGenerating}
+            />
+
+            {/* Command Palette */}
+            <EditorCommandPalette
+                open={commandOpen}
+                setOpen={setCommandOpen}
+                canUndo={canUndo}
+                canRedo={canRedo}
+                onUndo={undo}
+                onRedo={redo}
+                onAiGenerate={() => handleAiGenerate(topicInput || 'Content Marketing')}
+                onExport={handleExport}
+                onTabChange={(tab) => setMobileTab(tab as MobileTab)}
+            />
         </div>
     );
 }

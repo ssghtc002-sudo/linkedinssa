@@ -4,7 +4,7 @@ import { Slide } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { Trash2, ArrowUp, ArrowDown, Copy, AlignLeft, AlignCenter, MessageSquareQuote, List } from 'lucide-react';
+import { Trash2, ArrowUp, ArrowDown, Copy, GripVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SlideCardProps {
@@ -34,12 +34,20 @@ export const SlideCard: React.FC<SlideCardProps> = ({
 }) => {
     return (
         <Card className="group relative border border-border/40 hover:border-primary/40 transition-all duration-200 shadow-sm hover:shadow-md bg-white/50 dark:bg-slate-900/50 hover:bg-white/80 dark:hover:bg-slate-900/80 backdrop-blur-sm overflow-visible">
-            {/* Slide Number Badge */}
-            <div className="absolute -left-2.5 top-3 flex items-center justify-center w-5 h-5 rounded-r-md bg-gradient-to-r from-blue-500 to-purple-600 text-[9px] font-mono font-bold text-white shadow-md z-20 group-hover:scale-110 transition-transform">
-                {index + 1}
+            {/* Drag Handle / Type Badge */}
+            <div className="flex items-center justify-between px-2 py-1.5 border-b border-border/5 bg-slate-50/50 dark:bg-slate-900/50 rounded-t-lg">
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <GripVertical className="w-3 h-3 cursor-grab opacity-50 hover:opacity-100 transition-opacity" />
+                    <span className="text-[9px] font-bold uppercase tracking-wider opacity-80">
+                        {slide.slideType || 'Standard'}
+                    </span>
+                </div>
+                <div className="flex items-center justify-center w-4 h-4 rounded-sm bg-gradient-to-br from-blue-500/20 to-purple-600/20 text-blue-600 dark:text-blue-400 text-[9px] font-mono font-bold">
+                    {index + 1}
+                </div>
             </div>
 
-            <CardContent className="pl-4 pr-2 py-2 space-y-2">
+            <CardContent className="px-3 py-2 space-y-2">
                 <div className="space-y-1.5">
                     {/* Title Input */}
                     <Input
@@ -61,29 +69,8 @@ export const SlideCard: React.FC<SlideCardProps> = ({
 
                 {/* Controls Bar */}
                 <div className="flex items-center justify-between pt-1.5 border-t border-border/10">
-                    {/* Layout Selectors */}
-                    <div className="flex bg-muted/30 p-0.5 rounded-md border border-border/10 gap-0.5">
-                        {[
-                            { id: 'left', icon: AlignLeft, label: 'Left', color: 'blue' },
-                            { id: 'center', icon: AlignCenter, label: 'Center', color: 'purple' },
-                            { id: 'quote', icon: MessageSquareQuote, label: 'Quote', color: 'pink' },
-                            { id: 'list', icon: List, label: 'List', color: 'green' }
-                        ].map((l) => (
-                            <button
-                                key={l.id}
-                                onClick={() => onUpdate('layout', l.id as any)}
-                                className={cn(
-                                    "w-6 h-6 flex items-center justify-center rounded-sm transition-all duration-150",
-                                    slide.layout === l.id
-                                        ? `bg-${l.color}-500/10 text-${l.color}-600 dark:text-${l.color}-400 ring-1 ring-${l.color}-500/20`
-                                        : "text-muted-foreground hover:text-foreground hover:bg-white/40 dark:hover:bg-slate-800/40"
-                                )}
-                                title={l.label}
-                            >
-                                <l.icon className="w-3 h-3" />
-                            </button>
-                        ))}
-                    </div>
+                    {/* Spacer to push actions to right */}
+                    <div className="flex-1" />
 
                     {/* Slide Actions */}
                     <div className="flex items-center gap-0.5 opacity-60 group-hover:opacity-100 transition-opacity">
